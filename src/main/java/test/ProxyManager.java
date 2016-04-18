@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by 10 on 18.04.2016.
  */
-public class ProxyManager {
+class ProxyManager {
 
     private final ProxyRepository proxyRepository;
     private ExecutorService executorService;
@@ -37,17 +37,17 @@ public class ProxyManager {
     private boolean isWorking;
     private int sleepTimeInSeconds = 5;
 
-    public ProxyManager(ProxyRepository proxyRepository) {
+    ProxyManager(ProxyRepository proxyRepository) {
         this.proxyRepository = proxyRepository;
         executorService = Executors.newFixedThreadPool(10);
     }
 
-    public void startMonitoring() {
+    void startMonitoring() {
         if(!isWorking) {
             isWorking = true;
             List<Proxy> proxies = proxyRepository.getAll();
-            for (int i = 0; i < 20; i++) {
-                executorService.submit(new ProxyChecker(proxies.get(i)));
+            for (Proxy proxy : proxies) {
+                executorService.submit(new ProxyChecker(proxy));
             }
             isWorking = false;
         }
@@ -93,14 +93,20 @@ public class ProxyManager {
 
                 CloseableHttpResponse response = httpclient.execute(target, request);
                 try {
-                    System.out.println("----------------------------------------");
-                    System.out.println(response.getStatusLine());
-                    System.out.println(EntityUtils.toString(response.getEntity()));
+                    if(response.getStatusLine().getStatusCode() == 200) {
+                        System.out.println("----------------------------------------");
+                        System.out.println("proxy with id " + proxyEntity.getId() + " is valid");
+                        proxyEntity.setActive(true);
+                        proxyRepository.update(proxyEntity);
+                    }
+                    else {
+                        proxyEntity.setActive(false);
+                    }
                 } finally {
                     response.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
             } finally {
                 try {
                     httpclient.close();

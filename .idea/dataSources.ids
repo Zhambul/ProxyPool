@@ -10,8 +10,8 @@
       <schema id="2" parent="1" name="public">
         <object-id>2200</object-id>
         <comment>standard public schema</comment>
-        <introspection-state-number>652</introspection-state-number>
-        <introspection-timestamp>2016-04-18.15:16:54.101</introspection-timestamp>
+        <introspection-state-number>681</introspection-state-number>
+        <introspection-timestamp>2016-04-18.19:30:38.554</introspection-timestamp>
       </schema>
       <schema id="3" parent="1" name="pg_catalog">
         <object-id>11</object-id>
@@ -20,12 +20,12 @@
         <introspection-timestamp>2016-04-18.15:16:54.595</introspection-timestamp>
       </schema>
       <sequence id="4" parent="2" name="proxy_id_seq">
-        <object-id>16474</object-id>
-        <state-number>652</state-number>
+        <object-id>16538</object-id>
+        <state-number>681</state-number>
       </sequence>
       <table id="5" parent="2" name="proxy">
-        <object-id>16476</object-id>
-        <state-number>652</state-number>
+        <object-id>16540</object-id>
+        <state-number>681</state-number>
       </table>
       <table id="6" parent="3" name="pg_aggregate">
         <object-id>2600</object-id>
@@ -20773,57 +20773,57 @@
         <bind-function>bpchariclike(char,text)</bind-function>
       </operator>
       <column id="3701" parent="5" name="id">
-        <state-number>652</state-number>
+        <state-number>681</state-number>
         <mandatory>1</mandatory>
         <data-type>integer</data-type>
         <default-expression>nextval(&apos;proxy_id_seq&apos;::regclass)</default-expression>
       </column>
       <column id="3702" parent="5" name="is_active">
-        <state-number>652</state-number>
+        <state-number>681</state-number>
         <data-type>boolean</data-type>
       </column>
       <column id="3703" parent="5" name="city">
-        <state-number>652</state-number>
+        <state-number>681</state-number>
         <data-type>varchar(50)</data-type>
       </column>
       <column id="3704" parent="5" name="country">
-        <state-number>652</state-number>
+        <state-number>681</state-number>
         <data-type>varchar(50)</data-type>
       </column>
       <column id="3705" parent="5" name="ip">
-        <state-number>652</state-number>
+        <state-number>681</state-number>
         <data-type>varchar(50)</data-type>
       </column>
       <column id="3706" parent="5" name="last_request_date">
-        <state-number>652</state-number>
+        <state-number>681</state-number>
         <data-type>date</data-type>
       </column>
       <column id="3707" parent="5" name="login">
-        <state-number>652</state-number>
+        <state-number>681</state-number>
         <data-type>varchar(50)</data-type>
       </column>
       <column id="3708" parent="5" name="password">
-        <state-number>652</state-number>
+        <state-number>681</state-number>
         <data-type>varchar(50)</data-type>
       </column>
       <column id="3709" parent="5" name="port">
-        <state-number>652</state-number>
+        <state-number>681</state-number>
         <data-type>integer</data-type>
       </column>
       <column id="3710" parent="5" name="rating">
-        <state-number>652</state-number>
+        <state-number>681</state-number>
         <data-type>integer</data-type>
       </column>
       <column id="3711" parent="5" name="request_time">
-        <state-number>652</state-number>
+        <state-number>681</state-number>
         <data-type>timestamp</data-type>
       </column>
       <column id="3712" parent="5" name="scheme">
-        <state-number>652</state-number>
+        <state-number>681</state-number>
         <data-type>varchar(10)</data-type>
       </column>
       <index id="3713" parent="5" name="proxy_pkey">
-        <object-id>16480</object-id>
+        <object-id>16544</object-id>
         <columns>id</columns>
         <desc-columns></desc-columns>
         <unique>1</unique>
