@@ -14,13 +14,17 @@ import java.util.List;
  * Created by 10 on 18.04.2016.
  */
 
-public class ProxyParser {
+class ProxyParser {
 
-    private String csvFilePath = "C:\\Users\\10\\Downloads\\b7e7d21d37c146db8cdc876c66e45550.csv";
+    private String csvFilePath;
 
     private BufferedReader bufferedReader;
 
-    public List<Proxy> parse() {
+    ProxyParser(String csvFilePath) {
+        this.csvFilePath = csvFilePath;
+    }
+
+    List<Proxy> parse() {
         String line = "";
         List<Proxy> proxies = new ArrayList<Proxy>();
         try {

@@ -9,13 +9,15 @@ import java.util.List;
  */
 public interface ProxyRepository {
 
-    void saveAll(List<Proxy> proxies);
+    void saveOrUpdateAll(List<Proxy> proxies);
 
-    void save(Proxy proxy);
+    void saveOrUpdate(Proxy proxy);
 
     void delete(Proxy proxy);
 
     void update(Proxy proxy);
+
+    List<Proxy> getAllSorted();
 
     List<Proxy> getAll();
 }

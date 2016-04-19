@@ -21,6 +21,22 @@ public class Proxy {
     private String password;
     private String country;
     private String city;
+    private static final int minRating = -20;
+    private static final int maxRating = 20;
+
+    public void incRating() {
+        int currentRating = getRating();
+        if(currentRating < maxRating) {
+            setRating(++currentRating);
+        }
+    }
+
+    public void decRating() {
+        int currentRating = getRating();
+        if(currentRating > minRating) {
+            setRating(--currentRating);
+        }
+    }
 
     @Id
     @Column(name = "id", nullable = false)
