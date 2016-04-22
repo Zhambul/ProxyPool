@@ -46,7 +46,6 @@ class ProxyParser {
                     proxy.setCountry(country);
                     proxy.setCity(city);
                     proxy.setScheme(scheme);
-
                     proxies.add(proxy);
                 }
             }

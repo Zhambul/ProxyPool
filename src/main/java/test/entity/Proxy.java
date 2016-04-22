@@ -1,56 +1,74 @@
 package test.entity;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import javax.persistence.*;
 import java.sql.Date;
-import java.sql.Timestamp;
 
 /**
- * Created by 10 on 18.04.2016.
+ * Created by user on 22.04.2016.
  */
 @Entity
+@Table(name = "proxy_table", schema = "proxy", catalog = "")
 public class Proxy {
-    private Integer id;
+    public static final Integer MAX_RATING = 20;
+    public static final Integer MIN_RATING = -20;
+
+    private int id;
+    private Boolean isActive;
     private String ip;
-    private boolean isActive;
-    private Date lastRequestDate;
-    private int rating;
-    private Timestamp requestTime;
-    private int port;
+    private Integer port;
     private String scheme;
-    private String login;
-    private String password;
+    private Integer rating;
     private String country;
     private String city;
-    private static final int minRating = -20;
-    private static final int maxRating = 20;
+    private Date lastRequestDate;
+    private String login;
+    private String password;
 
     public void incRating() {
-        int currentRating = getRating();
-        if(currentRating < maxRating) {
+        Integer currentRating =  getRating();
+        if(currentRating == null) {
+            currentRating = 0;
+        }
+        if(currentRating < MAX_RATING) {
             setRating(++currentRating);
         }
     }
 
     public void decRating() {
-        int currentRating = getRating();
-        if(currentRating > minRating) {
+        Integer currentRating =  getRating();
+        if(currentRating == null) {
+            currentRating = 0;
+        }
+        if(currentRating > MIN_RATING) {
             setRating(--currentRating);
         }
     }
-
     @Id
+    @GenericGenerator(name="gen",strategy="increment")
+    @GeneratedValue(generator="gen")
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
     @Basic
-    @Column(name = "ip", nullable = true, length = 50)
+    @Column(name = "is_active", nullable = true)
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
+    }
+
+    @Basic
+    @Column(name = "ip", nullable = true, length = 45)
     public String getIp() {
         return ip;
     }
@@ -60,13 +78,53 @@ public class Proxy {
     }
 
     @Basic
-    @Column(name = "is_active", nullable = true)
-    public boolean isActive() {
-        return isActive;
+    @Column(name = "port", nullable = true)
+    public Integer getPort() {
+        return port;
     }
 
-    public void setActive(boolean active) {
-        isActive = active;
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    @Basic
+    @Column(name = "scheme", nullable = true, length = 45)
+    public String getScheme() {
+        return scheme;
+    }
+
+    public void setScheme(String scheme) {
+        this.scheme = scheme;
+    }
+
+    @Basic
+    @Column(name = "rating", nullable = true)
+    public Integer getRating() {
+        return rating;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
+
+    @Basic
+    @Column(name = "country", nullable = true, length = 45)
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    @Basic
+    @Column(name = "city", nullable = true, length = 45)
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 
     @Basic
@@ -80,47 +138,7 @@ public class Proxy {
     }
 
     @Basic
-    @Column(name = "rating", nullable = true)
-    public int getRating() {
-        return rating;
-    }
-
-    public void setRating(int rating) {
-        this.rating = rating;
-    }
-
-    @Basic
-    @Column(name = "request_time", nullable = true)
-    public Timestamp getRequestTime() {
-        return requestTime;
-    }
-
-    public void setRequestTime(Timestamp requestTime) {
-        this.requestTime = requestTime;
-    }
-
-    @Basic
-    @Column(name = "port", nullable = true)
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    @Basic
-    @Column(name = "scheme", nullable = true, length = 10)
-    public String getScheme() {
-        return scheme;
-    }
-
-    public void setScheme(String scheme) {
-        this.scheme = scheme;
-    }
-
-    @Basic
-    @Column(name = "login", nullable = true, length = 50)
+    @Column(name = "login", nullable = true, length = 45)
     public String getLogin() {
         return login;
     }
@@ -130,7 +148,7 @@ public class Proxy {
     }
 
     @Basic
-    @Column(name = "password", nullable = true, length = 50)
+    @Column(name = "password", nullable = true, length = 45)
     public String getPassword() {
         return password;
     }
@@ -139,64 +157,44 @@ public class Proxy {
         this.password = password;
     }
 
-    @Basic
-    @Column(name = "country", nullable = true, length = 50)
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    @Basic
-    @Column(name = "city", nullable = true, length = 50)
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Proxy proxy = (Proxy) o;
+        Proxy that = (Proxy) o;
 
-        if (isActive != proxy.isActive) return false;
-        if (rating != proxy.rating) return false;
-        if (port != proxy.port) return false;
-        if (id != null ? !id.equals(proxy.id) : proxy.id != null) return false;
-        if (ip != null ? !ip.equals(proxy.ip) : proxy.ip != null) return false;
-        if (lastRequestDate != null ? !lastRequestDate.equals(proxy.lastRequestDate) : proxy.lastRequestDate != null)
+        if (id != that.id) return false;
+        if (isActive != null ? !isActive.equals(that.isActive) : that.isActive != null) return false;
+        if (ip != null ? !ip.equals(that.ip) : that.ip != null) return false;
+        if (port != null ? !port.equals(that.port) : that.port != null) return false;
+        if (scheme != null ? !scheme.equals(that.scheme) : that.scheme != null) return false;
+        if (rating != null ? !rating.equals(that.rating) : that.rating != null) return false;
+        if (country != null ? !country.equals(that.country) : that.country != null) return false;
+        if (city != null ? !city.equals(that.city) : that.city != null) return false;
+        if (lastRequestDate != null ? !lastRequestDate.equals(that.lastRequestDate) : that.lastRequestDate != null)
             return false;
-        if (requestTime != null ? !requestTime.equals(proxy.requestTime) : proxy.requestTime != null) return false;
-        if (scheme != null ? !scheme.equals(proxy.scheme) : proxy.scheme != null) return false;
-        if (login != null ? !login.equals(proxy.login) : proxy.login != null) return false;
-        if (password != null ? !password.equals(proxy.password) : proxy.password != null) return false;
-        if (country != null ? !country.equals(proxy.country) : proxy.country != null) return false;
-        if (city != null ? !city.equals(proxy.city) : proxy.city != null) return false;
+        if (login != null ? !login.equals(that.login) : that.login != null) return false;
+        if (password != null ? !password.equals(that.password) : that.password != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
+        int result = id;
+        result = 31 * result + (isActive != null ? isActive.hashCode() : 0);
         result = 31 * result + (ip != null ? ip.hashCode() : 0);
-        result = 31 * result + (isActive ? 1 : 0);
-        result = 31 * result + (lastRequestDate != null ? lastRequestDate.hashCode() : 0);
-        result = 31 * result + rating;
-        result = 31 * result + (requestTime != null ? requestTime.hashCode() : 0);
-        result = 31 * result + port;
+        result = 31 * result + (port != null ? port.hashCode() : 0);
         result = 31 * result + (scheme != null ? scheme.hashCode() : 0);
-        result = 31 * result + (login != null ? login.hashCode() : 0);
-        result = 31 * result + (password != null ? password.hashCode() : 0);
+        result = 31 * result + (rating != null ? rating.hashCode() : 0);
         result = 31 * result + (country != null ? country.hashCode() : 0);
         result = 31 * result + (city != null ? city.hashCode() : 0);
+        result = 31 * result + (lastRequestDate != null ? lastRequestDate.hashCode() : 0);
+        result = 31 * result + (login != null ? login.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
         return result;
     }
+
+
 }

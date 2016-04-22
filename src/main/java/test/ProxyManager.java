@@ -6,7 +6,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import test.database.ProxyRepository;
 import test.entity.Proxy;
-import test.util.Logger;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,6 +16,7 @@ import java.util.concurrent.Executors;
  * Created by 10 on 18.04.2016.
  */
 class ProxyManager {
+    static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ProxyManager.class.getName());
 
     private final ProxyRepository proxyRepository;
     private ExecutorService executorService;
@@ -38,7 +38,7 @@ class ProxyManager {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         try {
             CloseableHttpResponse response = proxyRequest.execute(bestProxy, 5 * 1000, httpClient, targetUrl);
-            Logger.i(EntityUtils.toString(response.getEntity(), "UTF-8"));
+            logger.info(EntityUtils.toString(response.getEntity(), "UTF-8"));
         } catch (IOException e) {
             e.printStackTrace();
         }

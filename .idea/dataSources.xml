@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DataSourceManagerImpl" format="xml" hash="3742291498">
-    <data-source source="LOCAL" name="PostgreSQL - postgres@localhost" uuid="c8c22669-0dcb-417c-b63c-6e29ab0184bf">
-      <driver-ref>postgresql</driver-ref>
+  <component name="DataSourceManagerImpl" format="xml" hash="4068743058">
+    <data-source source="LOCAL" name="MySQL - proxy@localhost" uuid="76356f6b-9dbf-469d-95c7-1ae709c2f096">
+      <driver-ref>mysql</driver-ref>
       <synchronize>true</synchronize>
-      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/postgres</jdbc-url>
+      <jdbc-driver>com.mysql.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://localhost:3306/proxy</jdbc-url>
+      <driver-properties>
+        <property name="autoReconnect" value="true" />
+        <property name="zeroDateTimeBehavior" value="convertToNull" />
+        <property name="tinyInt1isBit" value="false" />
+        <property name="characterEncoding" value="utf8" />
+        <property name="characterSetResults" value="utf8" />
+        <property name="yearIsDateType" value="false" />
+      </driver-properties>
     </data-source>
   </component>
 </project>

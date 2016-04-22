@@ -6,14 +6,13 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import test.entity.Proxy;
-import test.util.Logger;
 
 import java.io.IOException;
 /**
  * Created by 10 on 19.04.2016.
  */
 class ProxyRequest {
-
+    static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ProxyRequest.class.getName());
 
 
     CloseableHttpResponse execute(Proxy proxyEntity, int timeOut, CloseableHttpClient httpclient, String targetUrl)
@@ -30,7 +29,7 @@ class ProxyRequest {
         HttpGet request = new HttpGet("/");
         request.setConfig(config);
 
-        Logger.d("Executing request " + request.getRequestLine() + " to " + target + " via " + proxy);
+        logger.debug("Executing request " + request.getRequestLine() + " to " + target + " via " + proxy);
 
         return httpclient.execute(target, request);
     }

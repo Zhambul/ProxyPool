@@ -2,7 +2,6 @@ package test.database;
 
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
 import test.entity.Proxy;
 import test.util.HibernateSessionFactory;
 
@@ -51,13 +50,14 @@ public class ProxyRepositoryImpl implements ProxyRepository{
 
     public List<Proxy> getAllSorted() {
         Session session = HibernateSessionFactory.getSessionFactory().openSession();
-        SQLQuery sqlQuery = session.createSQLQuery("SELECT * FROM proxy ORDER BY is_active DESC, rating DESC");
+        SQLQuery sqlQuery = session.createSQLQuery("SELECT * FROM proxy_table ORDER BY is_active DESC, rating DESC");
         sqlQuery.addEntity(Proxy.class);
         return sqlQuery.list();
     }
 
     public List<Proxy> getAll() {
         Session session = HibernateSessionFactory.getSessionFactory().openSession();
-        return session.createCriteria(Proxy.class).list();
+        List res = session.createCriteria(Proxy.class).list();
+        return res;
     }
 }
