@@ -1,6 +1,8 @@
 package test;
 
 import akka.actor.UntypedActor;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -12,45 +14,49 @@ import java.sql.Date;
 import java.util.Calendar;
 
 /**
- * Created by 10 on 19.04.2016.
+ * Created by Жамбыл on 4/23/2016.
  */
-class ProxyChecker implements Runnable {
-    static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ProxyChecker.class.getName());
+public class ProxyCheckerActor extends UntypedActor {
+
+    private LoggingAdapter logger = Logging.getLogger(getContext().system(), this);
 
     private Proxy proxyEntity;
     private int timeOut;
     private ProxyRequest proxyRequest;
     private ProxyRepository proxyRepository;
 
-    ProxyChecker(Proxy proxy, int timeOut, ProxyRepository proxyRepository) {
+    ProxyCheckerActor(Proxy proxy, int timeOut, ProxyRepository proxyRepository) {
         this.proxyEntity = proxy;
         this.timeOut = timeOut;
         this.proxyRepository = proxyRepository;
         proxyRequest = new ProxyRequest();
     }
+    public ProxyCheckerActor() {
+    }
 
     @Override
-    public void run() {
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        try {
-            CloseableHttpResponse response = proxyRequest.execute(proxyEntity, timeOut, httpclient, "google.com");
+    public void onReceive(Object o) throws Exception {
+        if(o instanceof String && o.equals("check")) {
+            CloseableHttpClient httpclient = HttpClients.createDefault();
             try {
-                validateResponse(proxyEntity, response);
-            } finally {
-                response.close();
+                CloseableHttpResponse response = proxyRequest.execute(proxyEntity, timeOut, httpclient, "google.com");
+                try {
+                    validateResponse(proxyEntity, response);
+                } finally {
+                    response.close();
+                }
             }
-        }
-        catch (Exception e) {
-            onProxyFailed(proxyEntity);
-        } finally {
-            try {
-                httpclient.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            catch (Exception e) {
+                onProxyFailed(proxyEntity);
+            } finally {
+                try {
+                    httpclient.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
-
     private void validateResponse(Proxy proxyEntity, CloseableHttpResponse response) {
         if(response.getStatusLine().getStatusCode() == 200) {
             onProxySucceeded(proxyEntity);

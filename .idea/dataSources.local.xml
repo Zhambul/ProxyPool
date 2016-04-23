@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="dataSourceStorageLocal">
-    <data-source name="MySQL - proxy@localhost" uuid="76356f6b-9dbf-469d-95c7-1ae709c2f096">
+    <data-source name="MySQL - proxy@localhost" uuid="42d246a7-b4b0-493d-ba4d-91b48f45357c">
       <secret-storage>master_key</secret-storage>
       <user-name>root</user-name>
     </data-source>

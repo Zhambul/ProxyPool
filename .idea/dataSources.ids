@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component name="dataSourceStorage">
-  <data-source name="MySQL - proxy@localhost" uuid="76356f6b-9dbf-469d-95c7-1ae709c2f096">
+  <data-source name="MySQL - proxy@localhost" uuid="42d246a7-b4b0-493d-ba4d-91b48f45357c">
     <database-info product="MySQL" version="5.7.12-log" jdbc-version="4.0" driver-name="MySQL Connector Java" driver-version="mysql-connector-java-5.1.35 ( Revision: 5fb9c5849535c13917c2cf9baaece6ef9693ef27 )">
       <extra-name-characters>#@</extra-name-characters>
       <identifier-quote-string>`</identifier-quote-string>
@@ -12,36 +12,35 @@
       <column id="3" parent="2" name="id">
         <mandatory>1</mandatory>
         <data-type>int(11)</data-type>
-        <sequence-identity>1</sequence-identity>
       </column>
       <column id="4" parent="2" name="is_active">
         <data-type>bit(1)</data-type>
       </column>
-      <column id="5" parent="2" name="ip">
+      <column id="5" parent="2" name="city">
         <data-type>varchar(45)</data-type>
       </column>
-      <column id="6" parent="2" name="port">
-        <data-type>int(11)</data-type>
-      </column>
-      <column id="7" parent="2" name="scheme">
+      <column id="6" parent="2" name="country">
         <data-type>varchar(45)</data-type>
       </column>
-      <column id="8" parent="2" name="rating">
-        <data-type>int(11)</data-type>
-      </column>
-      <column id="9" parent="2" name="country">
+      <column id="7" parent="2" name="ip">
         <data-type>varchar(45)</data-type>
       </column>
-      <column id="10" parent="2" name="city">
-        <data-type>varchar(45)</data-type>
-      </column>
-      <column id="11" parent="2" name="last_request_date">
+      <column id="8" parent="2" name="last_request_date">
         <data-type>date</data-type>
       </column>
-      <column id="12" parent="2" name="login">
+      <column id="9" parent="2" name="login">
         <data-type>varchar(45)</data-type>
       </column>
-      <column id="13" parent="2" name="password">
+      <column id="10" parent="2" name="password">
+        <data-type>varchar(45)</data-type>
+      </column>
+      <column id="11" parent="2" name="port">
+        <data-type>int(11)</data-type>
+      </column>
+      <column id="12" parent="2" name="rating">
+        <data-type>int(11)</data-type>
+      </column>
+      <column id="13" parent="2" name="scheme">
         <data-type>varchar(45)</data-type>
       </column>
       <key id="14" parent="2" name="PRIMARY">

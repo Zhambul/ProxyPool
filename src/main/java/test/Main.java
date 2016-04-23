@@ -1,5 +1,11 @@
 package test;
 
+import akka.actor.Actor;
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.Props;
+import akka.japi.Creator;
+import akka.routing.RoundRobinPool;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import org.apache.log4j.Logger;
@@ -36,7 +42,13 @@ public class Main {
 
         if (optionSet.has("check")) {
             logger.info("checking");
-            proxyManager.startMonitoring();
+
+            ActorSystem system = ActorSystem.create("system");
+            ActorRef proxyManagerRef = system.actorOf(
+                    Props.create(ProxyManagerActor.class,(Creator<ProxyManagerActor>) () ->
+                            new ProxyManagerActor(proxyRepository)).withRouter(new RoundRobinPool(1)));
+            proxyManagerRef.tell("startMonitoring",ActorRef.noSender());
+
         } else if (optionSet.has("parse")) {
             String filePath = (String) optionSet.valueOf("parse");
             logger.info("parsing " + filePath );
