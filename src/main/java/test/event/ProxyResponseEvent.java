@@ -8,8 +8,8 @@ import test.entity.Proxy;
  * Created by Жамбыл on 4/23/2016.
  */
 public class ProxyResponseEvent {
-    private Proxy proxy;
-    private CloseableHttpResponse response;
+    private final Proxy proxy;
+    private final CloseableHttpResponse response;
 
     public ProxyResponseEvent(Proxy proxy, CloseableHttpResponse response) {
         this.proxy = proxy;

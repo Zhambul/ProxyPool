@@ -6,8 +6,8 @@ import test.entity.Proxy;
  * Created by Жамбыл on 4/23/2016.
  */
 public class ProxyRequestEvent {
-    private Proxy proxy;
-    private String url;
+    private final Proxy proxy;
+    private final String url;
 
     public ProxyRequestEvent(Proxy proxy, String url) {
         this.proxy = proxy;

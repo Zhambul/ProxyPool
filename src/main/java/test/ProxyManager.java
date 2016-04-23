@@ -7,16 +7,13 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import akka.routing.RoundRobinPool;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import test.database.ProxyRepository;
 import test.entity.Proxy;
+import test.event.ProxyParseEvent;
+import test.event.ProxyParsedEvent;
 import test.event.ProxyRequestEvent;
 import test.event.ProxyResponseEvent;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -25,24 +22,27 @@ import java.util.List;
 class ProxyManager extends UntypedActor{
     private LoggingAdapter logger = Logging.getLogger(getContext().system(),this);
 
-    private static final int nOfRequests = 1;
+    private static final int nOfRequests = 10;
     private static final int CHECKING_TIMEOUT = 3 * 1000;
     private static final int REQUEST_TIMEOUT = 5 * 1000;
 
     private final ProxyRepository proxyRepository;
-    private ActorRef proxyCheckers;
+    private ActorRef proxyChecker;
     private ActorRef proxyRequest;
+    private ActorRef proxyParser;
 
     ProxyManager(ProxyRepository proxyRepository) {
         this.proxyRepository = proxyRepository;
 
-        proxyCheckers = getContext().actorOf(
+        proxyChecker = getContext().actorOf(
                 Props.create(ProxyChecker.class,(Creator<ProxyChecker>) () ->
                         new ProxyChecker(CHECKING_TIMEOUT,proxyRepository)));
 
         proxyRequest = getContext().actorOf(
                 Props.create(ProxyRequest.class, (Creator<ProxyRequest>) ()
                     -> new ProxyRequest(REQUEST_TIMEOUT)).withRouter(new RoundRobinPool(nOfRequests)));
+
+        proxyParser = getContext().actorOf(Props.create(ProxyParser.class));
     }
 
     @Override
@@ -61,6 +61,15 @@ class ProxyManager extends UntypedActor{
             logger.info(proxyResponse.getResponse().getStatusLine().toString());
             proxyResponse.getResponse().close();
         }
+        else if(o instanceof ProxyParseEvent) {
+            ProxyParseEvent proxyParseEvent = (ProxyParseEvent) o;
+            proxyParser.tell(proxyParseEvent.getFilePath(),getSelf());
+        }
+        else if(o instanceof ProxyParsedEvent) {
+            ProxyParsedEvent proxyParsedEvent = (ProxyParsedEvent) o;
+            proxyRepository.saveOrUpdateAll(proxyParsedEvent.getProxies());
+            logger.info("successfully parsed and added to database");
+        }
         else {
             unhandled(o);
         }
@@ -78,7 +87,7 @@ class ProxyManager extends UntypedActor{
     private void startMonitoring() {
         List<Proxy> proxies = proxyRepository.getAllSorted();
         for (Proxy proxy : proxies) {
-            proxyCheckers.tell(proxy, getSelf());
+            proxyChecker.tell(proxy, getSelf());
         }
     }
 

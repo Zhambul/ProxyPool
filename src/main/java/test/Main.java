@@ -5,12 +5,15 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
+import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
+import joptsimple.OptionSpecBuilder;
 import org.apache.log4j.Logger;
 import test.database.ProxyRepository;
 import test.database.ProxyRepositoryImpl;
 import test.entity.Proxy;
+import test.event.ProxyParseEvent;
 
 import java.util.List;
 
@@ -18,7 +21,6 @@ import java.util.List;
 public class Main {
     private static ProxyRepository proxyRepository = new ProxyRepositoryImpl();
     private static ActorRef proxyManagerRef;
-    private static ProxyParser proxyParser;
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) throws Exception {
@@ -31,20 +33,16 @@ public class Main {
             logger.info("request to " + url);
             proxyManagerRef.tell("executeProxyRequest " + url,ActorRef.noSender());
         }
-
-        if (optionSet.has("check")) {
+        else if (optionSet.has("check")) {
             logger.info("checking");
             proxyManagerRef.tell("startMonitoring",ActorRef.noSender());
-
-        } else if (optionSet.has("parse")) {
+        }
+        else if (optionSet.has("parse")) {
             String filePath = (String) optionSet.valueOf("parse");
             logger.info("parsing " + filePath );
-            proxyParser = new ProxyParser(filePath);
-            List<Proxy> parsedProxies = proxyParser.parse();
-            proxyRepository.saveOrUpdateAll(parsedProxies);
-            logger.info("success");
+            ProxyParseEvent proxyParseEvent = new ProxyParseEvent(filePath);
+            proxyManagerRef.tell(proxyParseEvent,ActorRef.noSender());
         }
-
     }
 
     private static void initActorSystem() {
