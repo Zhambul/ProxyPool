@@ -10,10 +10,12 @@ import test.entity.Proxy;
 public class ProxyResponseEvent {
     private final Proxy proxy;
     private final CloseableHttpResponse response;
+    private final String url;
 
-    public ProxyResponseEvent(Proxy proxy, CloseableHttpResponse response) {
+    public ProxyResponseEvent(Proxy proxy, CloseableHttpResponse response, String url) {
         this.proxy = proxy;
         this.response = response;
+        this.url = url;
     }
 
     public Proxy getProxy() {
@@ -23,5 +25,9 @@ public class ProxyResponseEvent {
     @Nullable
     public CloseableHttpResponse getResponse() {
         return response;
+    }
+
+    public String getUrl() {
+        return url;
     }
 }

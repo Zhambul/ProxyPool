@@ -14,7 +14,9 @@ import test.event.ProxyParsedEvent;
 import test.event.ProxyRequestEvent;
 import test.event.ProxyResponseEvent;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by Жамбыл on 4/23/2016.
@@ -24,7 +26,7 @@ class ProxyManager extends UntypedActor{
 
     private static final int nOfRequests = 10;
     private static final int CHECKING_TIMEOUT = 3 * 1000;
-    private static final int REQUEST_TIMEOUT = 5 * 1000;
+    private static final int REQUEST_TIMEOUT = 3 * 1000;
 
     private final ProxyRepository proxyRepository;
     private ActorRef proxyChecker;
@@ -58,8 +60,7 @@ class ProxyManager extends UntypedActor{
         }
         else if(o instanceof ProxyResponseEvent) {
             ProxyResponseEvent proxyResponse = (ProxyResponseEvent) o;
-            logger.info(proxyResponse.getResponse().getStatusLine().toString());
-            proxyResponse.getResponse().close();
+            onProxyResponse(proxyResponse);
         }
         else if(o instanceof ProxyParseEvent) {
             ProxyParseEvent proxyParseEvent = (ProxyParseEvent) o;
@@ -75,12 +76,34 @@ class ProxyManager extends UntypedActor{
         }
     }
 
+    private void onProxyResponse(ProxyResponseEvent proxyResponse) throws IOException {
+        if(proxyResponse.getResponse() == null || proxyResponse.getResponse().getStatusLine().getStatusCode() != 200) {
+            logger.info("fail using proxy, try next ");
+            Proxy failedProxy = proxyResponse.getProxy();
+            failedProxy.decRating();
+            failedProxy.setActive(false);
+            logger.info("updating ");
+            proxyRepository.update(failedProxy);
+            getSelf().tell("executeProxyRequest " + proxyResponse.getUrl(), getSelf());
+        }
+        else {
+            logger.info(proxyResponse.getResponse().getStatusLine().toString());
+            proxyResponse.getResponse().close();
+        }
+    }
+
     private void executeProxyRequest(String message) {
+        logger.info("exec command");
         String url = message.replace("executeProxyRequest ","");
         String targetUrl = validateUrl(url);
-        List<Proxy> proxiesSorted = proxyRepository.getAllSorted();
-        Proxy bestProxy = proxiesSorted.get(0);
-        ProxyRequestEvent proxyRequestEvent = new ProxyRequestEvent(bestProxy, targetUrl);
+        List<Proxy> proxiesActive = proxyRepository.getActive();
+        if(proxiesActive.size() == 0) {
+            logger.info("no active proxies ");
+            return;
+        }
+        Proxy proxy = proxiesActive.get(new Random().nextInt(proxiesActive.size()));
+        logger.info("executing request via proxy with id " + proxy.getId() +" to " + targetUrl);
+        ProxyRequestEvent proxyRequestEvent = new ProxyRequestEvent(proxy, targetUrl);
         proxyRequest.tell(proxyRequestEvent,getSelf());
     }
 

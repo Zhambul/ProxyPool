@@ -60,4 +60,13 @@ public class ProxyRepositoryImpl implements ProxyRepository{
         List res = session.createCriteria(Proxy.class).list();
         return res;
     }
+
+    @Override
+    public List<Proxy> getActive() {
+        Session session = HibernateSessionFactory.getSessionFactory().openSession();
+        SQLQuery sqlQuery = session.createSQLQuery("SELECT * FROM proxy_table" +
+                                                    " WHERE is_active = TRUE ");
+        sqlQuery.addEntity(Proxy.class);
+        return sqlQuery.list();
+    }
 }

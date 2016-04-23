@@ -20,4 +20,6 @@ public interface ProxyRepository {
     List<Proxy> getAllSorted();
 
     List<Proxy> getAll();
+
+    List<Proxy> getActive();
 }
