@@ -1,53 +1,84 @@
 package test;
 
+import akka.actor.ActorRef;
+import akka.actor.Props;
+import akka.actor.UntypedActor;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
+import akka.japi.Creator;
+import akka.routing.RoundRobinPool;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import test.database.ProxyRepository;
 import test.entity.Proxy;
+import test.event.ProxyRequestEvent;
+import test.event.ProxyResponseEvent;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
- * Created by 10 on 18.04.2016.
+ * Created by Жамбыл on 4/23/2016.
  */
-class ProxyManager {
-    static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ProxyManager.class.getName());
+class ProxyManager extends UntypedActor{
+    private LoggingAdapter logger = Logging.getLogger(getContext().system(),this);
+
+    private static final int nOfRequests = 1;
+    private static final int CHECKING_TIMEOUT = 3 * 1000;
+    private static final int REQUEST_TIMEOUT = 5 * 1000;
 
     private final ProxyRepository proxyRepository;
-    private ExecutorService executorService;
-
-    private static final int CHECkING_TIMEOUT = 2 * 1000;
-    private boolean isWorking;
-    private ProxyRequest proxyRequest;
+    private ActorRef proxyCheckers;
+    private ActorRef proxyRequest;
 
     ProxyManager(ProxyRepository proxyRepository) {
         this.proxyRepository = proxyRepository;
-        executorService = Executors.newFixedThreadPool(10);
-        proxyRequest = new ProxyRequest();
+
+        proxyCheckers = getContext().actorOf(
+                Props.create(ProxyChecker.class,(Creator<ProxyChecker>) () ->
+                        new ProxyChecker(CHECKING_TIMEOUT,proxyRepository)));
+
+        proxyRequest = getContext().actorOf(
+                Props.create(ProxyRequest.class, (Creator<ProxyRequest>) ()
+                    -> new ProxyRequest(REQUEST_TIMEOUT)).withRouter(new RoundRobinPool(nOfRequests)));
     }
 
-    void executeProxyRequest(String url) {
+    @Override
+    public void onReceive(Object o) throws Exception {
+        if(o instanceof String) {
+            String message = (String) o;
+            if(message.equals("startMonitoring")) {
+                startMonitoring();
+            }
+            else if(message.contains("executeProxyRequest ")) {
+                executeProxyRequest(message);
+            }
+        }
+        else if(o instanceof ProxyResponseEvent) {
+            ProxyResponseEvent proxyResponse = (ProxyResponseEvent) o;
+            logger.info(proxyResponse.getResponse().getStatusLine().toString());
+            proxyResponse.getResponse().close();
+        }
+        else {
+            unhandled(o);
+        }
+    }
+
+    private void executeProxyRequest(String message) {
+        String url = message.replace("executeProxyRequest ","");
         String targetUrl = validateUrl(url);
         List<Proxy> proxiesSorted = proxyRepository.getAllSorted();
         Proxy bestProxy = proxiesSorted.get(0);
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        try {
-            CloseableHttpResponse response = proxyRequest.execute(bestProxy, 5 * 1000, httpClient, targetUrl);
-            logger.info(EntityUtils.toString(response.getEntity(), "UTF-8"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        finally {
-            try {
-                httpClient.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        ProxyRequestEvent proxyRequestEvent = new ProxyRequestEvent(bestProxy, targetUrl);
+        proxyRequest.tell(proxyRequestEvent,getSelf());
+    }
+
+    private void startMonitoring() {
+        List<Proxy> proxies = proxyRepository.getAllSorted();
+        for (Proxy proxy : proxies) {
+            proxyCheckers.tell(proxy, getSelf());
         }
     }
 
@@ -60,21 +91,5 @@ class ProxyManager {
             targetUrl = url.replace("http://", "");
         }
         return targetUrl;
-    }
-
-    void startMonitoring() {
-        if(!isWorking) {
-            isWorking = true;
-            List<Proxy> proxies = proxyRepository.getAllSorted();
-            for (Proxy proxy : proxies) {
-                executorService.submit(new ProxyChecker(proxy, CHECkING_TIMEOUT, proxyRepository));
-            }
-            isWorking = false;
-        }
-    }
-
-    public void stopMonitoring() {
-        isWorking = false;
-        executorService.shutdown();
     }
 }
