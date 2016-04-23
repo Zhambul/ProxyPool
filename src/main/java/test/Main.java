@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import test.database.ProxyRepository;
 import test.database.ProxyRepositoryImpl;
 import test.entity.Proxy;
+import test.event.ExecuteRequestEvent;
 import test.event.ProxyParseEvent;
 
 import java.util.List;
@@ -31,7 +32,8 @@ public class Main {
         if (optionSet.has("request")) {
             String url = (String) optionSet.valueOf("request");
             logger.info("request to " + url);
-            proxyManagerRef.tell("executeProxyRequest " + url,ActorRef.noSender());
+            ExecuteRequestEvent executeRequestEvent = new ExecuteRequestEvent(url);
+            proxyManagerRef.tell(executeRequestEvent, ActorRef.noSender());
         }
         else if (optionSet.has("check")) {
             logger.info("checking");

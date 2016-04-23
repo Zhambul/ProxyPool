@@ -2,17 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6fc87c7c-b051-49d0-8c48-cba9210c2147" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/test/event/ExecuteRequestEvent.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/test/Main$1.class" afterPath="$PROJECT_DIR$/target/classes/test/Main$1.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/test/Main.class" afterPath="$PROJECT_DIR$/target/classes/test/Main.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/test/ProxyManager.class" afterPath="$PROJECT_DIR$/target/classes/test/ProxyManager.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/test/database/ProxyRepository.class" afterPath="$PROJECT_DIR$/target/classes/test/database/ProxyRepository.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/test/database/ProxyRepositoryImpl.class" afterPath="$PROJECT_DIR$/target/classes/test/database/ProxyRepositoryImpl.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/test/Main.java" afterPath="$PROJECT_DIR$/src/main/java/test/Main.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/test/ProxyManager.java" afterPath="$PROJECT_DIR$/src/main/java/test/ProxyManager.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/test/ProxyRequest.java" afterPath="$PROJECT_DIR$/src/main/java/test/ProxyRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/test/database/ProxyRepository.java" afterPath="$PROJECT_DIR$/src/main/java/test/database/ProxyRepository.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/test/database/ProxyRepositoryImpl.java" afterPath="$PROJECT_DIR$/src/main/java/test/database/ProxyRepositoryImpl.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/test/event/ProxyResponseEvent.java" afterPath="$PROJECT_DIR$/src/main/java/test/event/ProxyResponseEvent.java" />
     </list>
     <ignored path="ProxiesTest.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -57,24 +53,49 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Main.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Main.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/test/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-40">
-              <caret line="29" column="0" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+            <state relative-caret-position="187">
+              <caret line="30" column="0" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ProxyManager.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ExecuteRequestEvent.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/test/event/ExecuteRequestEvent.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="153">
+              <caret line="9" column="30" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="30" />
+              <folding>
+                <element signature="e#174#175#0" expanded="true" />
+                <element signature="e#204#205#0" expanded="true" />
+                <element signature="e#234#235#0" expanded="true" />
+                <element signature="e#260#261#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ProxyManager.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/test/ProxyManager.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-193">
-              <caret line="57" column="29" selection-start-line="57" selection-start-column="29" selection-end-line="57" selection-end-column="29" />
+            <state relative-caret-position="122">
+              <caret line="49" column="30" selection-start-line="49" selection-start-column="30" selection-end-line="49" selection-end-column="30" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Proxy.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/test/entity/Proxy.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-992">
+              <caret line="79" column="10" selection-start-line="79" selection-start-column="10" selection-end-line="79" selection-end-column="10" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -99,24 +120,12 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ProxyRepository.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/test/database/ProxyRepository.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="357">
-              <caret line="23" column="18" selection-start-line="23" selection-start-column="18" selection-end-line="23" selection-end-column="18" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="ProxyChecker.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/test/ProxyChecker.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="207">
-              <caret line="21" column="6" selection-start-line="21" selection-start-column="6" selection-end-line="21" selection-end-column="6" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
+            <state relative-caret-position="966">
+              <caret line="71" column="27" selection-start-line="71" selection-start-column="27" selection-end-line="71" selection-end-column="27" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -140,16 +149,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="28">
               <caret line="25" column="27" selection-start-line="25" selection-start-column="27" selection-end-line="25" selection-end-column="27" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ProxyRequestEvent.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/test/event/ProxyRequestEvent.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
-              <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -188,8 +187,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/main/java/Proxy.java" />
-        <option value="$PROJECT_DIR$/src/main/java/HibernateSessionFactory.java" />
         <option value="$PROJECT_DIR$/src/main/java/test/HibernateSessionFactory.java" />
         <option value="$APPLICATION_CONFIG_DIR$/consoles/db/8dee70c9-962d-4ab7-bbd5-d8c5065712a0/console.sql" />
         <option value="$APPLICATION_CONFIG_DIR$/consoles/db/ca0abf81-4414-4ad8-916a-9cfc3c062934/console.sql" />
@@ -223,14 +220,12 @@
         <option value="$PROJECT_DIR$/src/main/java/test/event/ProxyRequestResponse.java" />
         <option value="$PROJECT_DIR$/src/main/java/test/ProxyManagerActor.java" />
         <option value="$PROJECT_DIR$/src/main/java/test/ProxyCheckerActor.java" />
-        <option value="$PROJECT_DIR$/src/main/java/test/ProxyChecker.java" />
         <option value="$PROJECT_DIR$/src/main/resources/application.conf" />
         <option value="$PROJECT_DIR$/src/main/resources/log4j.properties" />
         <option value="$PROJECT_DIR$/src/main/java/test/Worker.java" />
         <option value="$PROJECT_DIR$/src/main/java/test/event/ProxyParsedEvent.java" />
         <option value="$PROJECT_DIR$/src/main/java/test/ProxyParser.java" />
         <option value="$PROJECT_DIR$/src/main/java/test/event/ProxyParseEvent.java" />
-        <option value="$PROJECT_DIR$/src/main/java/test/Main.java" />
         <option value="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" />
         <option value="$PROJECT_DIR$/src/main/java/test/event/ProxyRequestEvent.java" />
         <option value="$PROJECT_DIR$/src/main/java/test/event/ProxyResponseEvent.java" />
@@ -238,6 +233,10 @@
         <option value="$PROJECT_DIR$/src/main/java/test/database/ProxyRepositoryImpl.java" />
         <option value="$PROJECT_DIR$/src/main/java/test/ProxyRequest.java" />
         <option value="$APPLICATION_CONFIG_DIR$/consoles/db/42d246a7-b4b0-493d-ba4d-91b48f45357c/console.sql" />
+        <option value="$PROJECT_DIR$/src/main/java/test/ProxyChecker.java" />
+        <option value="$PROJECT_DIR$/src/main/java/test/event/ExecuteRequestEvet.java" />
+        <option value="$PROJECT_DIR$/src/main/java/test/event/ExecuteRequestEvent.java" />
+        <option value="$PROJECT_DIR$/src/main/java/test/Main.java" />
         <option value="$PROJECT_DIR$/src/main/java/test/ProxyManager.java" />
       </list>
     </option>
@@ -457,6 +456,36 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="entity" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ProxiesTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ProxiesTest" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="test" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="database" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -502,7 +531,7 @@
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
       <option name="MAIN_CLASS_NAME" value="test.Main" />
       <option name="VM_PARAMETERS" value="" />
-      <option name="PROGRAM_PARAMETERS" value="--request google.com" />
+      <option name="PROGRAM_PARAMETERS" value="--check" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
@@ -969,7 +998,7 @@
       <workItem from="1461328532692" duration="3048000" />
       <workItem from="1461334416725" duration="7833000" />
       <workItem from="1461365876412" duration="4240000" />
-      <workItem from="1461410549011" duration="21627000" />
+      <workItem from="1461410549011" duration="22653000" />
     </task>
     <task id="LOCAL-00001" summary="newasdsads">
       <created>1461370093637</created>
@@ -1006,11 +1035,18 @@
       <option name="project" value="LOCAL" />
       <updated>1461432332509</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="qwesadsa">
+      <created>1461439440486</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1461439440486</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="94580000" />
+    <option name="totallyTimeSpent" value="95606000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1034,7 +1070,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4423963" sideWeight="0.44285715" order="9" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24285714" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.74347156" sideWeight="0.55714285" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.42242703" sideWeight="0.55714285" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3293011" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Persistence" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2185501" sideWeight="0.47619048" order="2" side_tool="true" content_ui="tabs" />
@@ -1076,7 +1112,8 @@
     <MESSAGE value="proxyparser" />
     <MESSAGE value="proxyparser hernya" />
     <MESSAGE value="qwewqeewq" />
-    <option name="LAST_COMMIT_MESSAGE" value="qwewqeewq" />
+    <MESSAGE value="qwesadsa" />
+    <option name="LAST_COMMIT_MESSAGE" value="qwesadsa" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1089,7 +1126,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_77/src.zip!/java/lang/String.java" />
     <entry file="dbDummy://dbtable:/1b928457/c8c22669-0dcb-417c-b63c-6e29ab0184bf/postgres.public.proxy" />
     <entry file="jar://C:/Program Files/Java/jdk1.8.0_77/src.zip!/java/util/logging/Logger.java" />
     <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/c8c22669-0dcb-417c-b63c-6e29ab0184bf/console.sql" />
@@ -1247,14 +1283,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/test/entity/Proxy.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1088">
-          <caret line="79" column="10" selection-start-line="79" selection-start-column="10" selection-end-line="79" selection-end-column="10" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="dbDummy://dbtable:/3efa6997/42d246a7-b4b0-493d-ba4d-91b48f45357c/proxy.proxy_table">
       <provider editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -1372,14 +1400,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/test/Main.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-40">
-          <caret line="29" column="0" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/test/database/ProxyRepositoryImpl.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="385">
@@ -1410,23 +1430,50 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/test/entity/Proxy.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-992">
+          <caret line="79" column="10" selection-start-line="79" selection-start-column="10" selection-end-line="79" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/test/ProxyChecker.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="207">
-          <caret line="21" column="6" selection-start-line="21" selection-start-column="6" selection-end-line="21" selection-end-column="6" />
+        <state relative-caret-position="966">
+          <caret line="71" column="27" selection-start-line="71" selection-start-column="27" selection-end-line="71" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/test/event/ExecuteRequestEvent.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="9" column="30" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="30" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="e#174#175#0" expanded="true" />
+            <element signature="e#204#205#0" expanded="true" />
+            <element signature="e#234#235#0" expanded="true" />
+            <element signature="e#260#261#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/test/ProxyManager.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-193">
-          <caret line="57" column="29" selection-start-line="57" selection-start-column="29" selection-end-line="57" selection-end-column="29" />
+        <state relative-caret-position="122">
+          <caret line="49" column="30" selection-start-line="49" selection-start-column="30" selection-end-line="49" selection-end-column="30" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/test/Main.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="30" column="0" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>

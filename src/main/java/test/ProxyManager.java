@@ -9,10 +9,7 @@ import akka.japi.Creator;
 import akka.routing.RoundRobinPool;
 import test.database.ProxyRepository;
 import test.entity.Proxy;
-import test.event.ProxyParseEvent;
-import test.event.ProxyParsedEvent;
-import test.event.ProxyRequestEvent;
-import test.event.ProxyResponseEvent;
+import test.event.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -49,14 +46,12 @@ class ProxyManager extends UntypedActor{
 
     @Override
     public void onReceive(Object o) throws Exception {
-        if(o instanceof String) {
-            String message = (String) o;
-            if(message.equals("startMonitoring")) {
-                startMonitoring();
-            }
-            else if(message.contains("executeProxyRequest ")) {
-                executeProxyRequest(message);
-            }
+        if(o instanceof String && o.equals("startMonitoring")) {
+            startMonitoring();
+        }
+        else if(o instanceof ExecuteRequestEvent) {
+            ExecuteRequestEvent executeRequestEvent = (ExecuteRequestEvent) o;
+            executeProxyRequest(executeRequestEvent.getUrl());
         }
         else if(o instanceof ProxyResponseEvent) {
             ProxyResponseEvent proxyResponse = (ProxyResponseEvent) o;
@@ -92,9 +87,8 @@ class ProxyManager extends UntypedActor{
         }
     }
 
-    private void executeProxyRequest(String message) {
+    private void executeProxyRequest(String url) {
         logger.info("exec command");
-        String url = message.replace("executeProxyRequest ","");
         String targetUrl = validateUrl(url);
         List<Proxy> proxiesActive = proxyRepository.getActive();
         if(proxiesActive.size() == 0) {
