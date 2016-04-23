@@ -1,6 +1,5 @@
 package test;
 
-import akka.actor.UntypedActor;
 import com.sun.istack.internal.Nullable;
 import test.entity.Proxy;
 
@@ -15,27 +14,19 @@ import java.util.List;
  * Created by 10 on 18.04.2016.
  */
 
-class ProxyParser extends UntypedActor {
+class ProxyParser {
 
     private String csvFilePath;
 
     private BufferedReader bufferedReader;
 
-    @Override
-    public void onReceive(Object o) throws Exception {
-        if(o instanceof String) {
-            csvFilePath = (String) o;
-            List<Proxy> proxies = parse();
-            getSender().tell(proxies,getSelf());
-        }
-        else {
-            unhandled(o);
-        }
+    ProxyParser(String csvFilePath) {
+        this.csvFilePath = csvFilePath;
     }
 
-    private List<Proxy> parse() {
-        String line = "";
-        List<Proxy> proxies = new ArrayList<Proxy>();
+    List<Proxy> parse() {
+        String line;
+        List<Proxy> proxies = new ArrayList<>();
         try {
             bufferedReader = new BufferedReader(new FileReader(csvFilePath));
             while ((line = bufferedReader.readLine()) != null) {
@@ -59,8 +50,6 @@ class ProxyParser extends UntypedActor {
                 }
             }
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

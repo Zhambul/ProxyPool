@@ -15,13 +15,13 @@ import test.entity.Proxy;
 import java.util.List;
 
 
-public class Main extends UntypedActor{
-    private ProxyRepository proxyRepository = new ProxyRepositoryImpl();
-    private ActorRef proxyManagerRef;
-    private ActorRef proxyParser;
-    private final Logger logger = Logger.getLogger(Main.class.getName());
+public class Main {
+    private static ProxyRepository proxyRepository = new ProxyRepositoryImpl();
+    private static ActorRef proxyManagerRef;
+    private static ProxyParser proxyParser;
+    private static final Logger logger = Logger.getLogger(Main.class.getName());
 
-    private void start(String args[]) {
+    public static void main(String[] args) throws Exception {
         initActorSystem();
         OptionParser parser = initCLIParser();
         OptionSet optionSet = parser.parse(args);
@@ -29,49 +29,33 @@ public class Main extends UntypedActor{
         if (optionSet.has("request")) {
             String url = (String) optionSet.valueOf("request");
             logger.info("request to " + url);
-            proxyManagerRef.tell("executeProxyRequest " + url, getSelf());
+            proxyManagerRef.tell("executeProxyRequest " + url,ActorRef.noSender());
         }
 
         if (optionSet.has("check")) {
             logger.info("checking");
-            proxyManagerRef.tell("startMonitoring", getSelf());
+            proxyManagerRef.tell("startMonitoring",ActorRef.noSender());
 
         } else if (optionSet.has("parse")) {
             String filePath = (String) optionSet.valueOf("parse");
             logger.info("parsing " + filePath );
-            proxyParser.tell(filePath, getSelf());
-        }
-    }
-
-    @Override
-    public void onReceive(Object o) throws Exception {
-        if(o instanceof List) {
-            List<Proxy> parsedProxies = (List<Proxy>) o;
+            proxyParser = new ProxyParser(filePath);
+            List<Proxy> parsedProxies = proxyParser.parse();
             proxyRepository.saveOrUpdateAll(parsedProxies);
             logger.info("success");
         }
-        else {
-            unhandled(o);
-        }
-    }
-
-    public static void main(String[] args) throws Exception {
-        Main main = new Main();
-        main.start(args);
 
     }
 
-    private void initActorSystem() {
+    private static void initActorSystem() {
         ActorSystem system = ActorSystem.create("system");
 
         proxyManagerRef = system.actorOf(
                 Props.create(ProxyManager.class,(Creator<ProxyManager>) () ->
                         new ProxyManager(proxyRepository)));
-
-        proxyParser = system.actorOf(Props.create(ProxyParser.class));
     }
 
-    private OptionParser initCLIParser() {
+    private static OptionParser initCLIParser() {
         return new OptionParser() {
                 {
                     accepts("request").withRequiredArg();
