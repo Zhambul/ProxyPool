@@ -15,6 +15,7 @@ import test.event.ProxyRequestEvent;
 import test.event.ProxyResponseEvent;
 
 import java.io.IOException;
+import java.util.concurrent.*;
 
 /**
  * Created by 10 on 19.04.2016.
@@ -24,15 +25,11 @@ class ProxyRequest extends UntypedActor {
     private CloseableHttpClient httpClient;
 
     private final LoggingAdapter logger = Logging.getLogger(getContext().system(),this);
+    private int timeOut;
 
     public ProxyRequest(int timeOut) {
-        RequestConfig.Builder requestBuilder = RequestConfig.custom();
-        requestBuilder = requestBuilder.setConnectTimeout(timeOut);
-        requestBuilder = requestBuilder.setConnectionRequestTimeout(timeOut);
-
-        HttpClientBuilder builder = HttpClientBuilder.create();
-        builder.setDefaultRequestConfig(requestBuilder.build());
-        httpClient = builder.build();
+        this.timeOut = timeOut;
+        httpClient = HttpClients.createDefault();
     }
 
     @Override
@@ -61,15 +58,24 @@ class ProxyRequest extends UntypedActor {
         HttpGet request = new HttpGet("/");
         request.setConfig(config);
 
-        logger.info("Executing request " + request.getRequestLine() + " to " + target + " via " + proxyHost);
+        logger.debug("Executing request " + request.getRequestLine() + " to " + target + " via " + proxyHost);
+
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        ScheduledFuture<CloseableHttpResponse> result = executor.schedule(() ->
+                httpClient.execute(target, request), 3, TimeUnit.SECONDS);
+
         CloseableHttpResponse response = null;
         try {
-            response = httpClient.execute(target, request);
-            logger.info("request executed with code " + response.getStatusLine().getStatusCode() );
+            response = result.get();
+            logger.debug("request executed with code " + response.getStatusLine().getStatusCode() );
+        } catch (InterruptedException | ExecutionException e) {
+            logger.debug("error during request");
         }
-        catch (Exception e) {
-            logger.info("error during request");
-        }
+
         return new ProxyResponseEvent(proxy,response, targetUrl);
+    }
+
+    private void test() {
+
     }
 }

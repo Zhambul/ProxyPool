@@ -7,6 +7,7 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import akka.routing.RoundRobinPool;
+import org.apache.http.util.EntityUtils;
 import test.database.ProxyRepository;
 import test.entity.Proxy;
 import test.event.*;
@@ -29,6 +30,7 @@ class ProxyManager extends UntypedActor{
     private ActorRef proxyChecker;
     private ActorRef proxyRequest;
     private ActorRef proxyParser;
+    private ActorRef outside;
 
     ProxyManager(ProxyRepository proxyRepository) {
         this.proxyRepository = proxyRepository;
@@ -52,6 +54,9 @@ class ProxyManager extends UntypedActor{
         else if(o instanceof ExecuteRequestEvent) {
             ExecuteRequestEvent executeRequestEvent = (ExecuteRequestEvent) o;
             executeProxyRequest(executeRequestEvent.getUrl());
+            if(!executeRequestEvent.isAgain()) {
+                outside = getSender();
+            }
         }
         else if(o instanceof ProxyResponseEvent) {
             ProxyResponseEvent proxyResponse = (ProxyResponseEvent) o;
@@ -77,18 +82,21 @@ class ProxyManager extends UntypedActor{
             Proxy failedProxy = proxyResponse.getProxy();
             failedProxy.decRating();
             failedProxy.setActive(false);
-            logger.info("updating ");
+            logger.debug("updating proxy");
             proxyRepository.update(failedProxy);
-            getSelf().tell("executeProxyRequest " + proxyResponse.getUrl(), getSelf());
+            logger.debug("updated proxy");
+            ExecuteRequestEvent executeRequestEvent = new ExecuteRequestEvent(proxyResponse.getUrl(),true);
+            getSelf().tell(executeRequestEvent, getSelf());
         }
         else {
-            logger.info(proxyResponse.getResponse().getStatusLine().toString());
+//            logger.info(proxyResponse.getResponse().getStatusLine().toString());
+            outside.tell(EntityUtils.toString(proxyResponse.getResponse().getEntity()),getSelf());
             proxyResponse.getResponse().close();
         }
     }
 
     private void executeProxyRequest(String url) {
-        logger.info("exec command");
+        logger.debug("exec command");
         String targetUrl = validateUrl(url);
         List<Proxy> proxiesActive = proxyRepository.getActive();
         if(proxiesActive.size() == 0) {

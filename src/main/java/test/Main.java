@@ -5,6 +5,10 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Creator;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClientResponse;
 import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -20,48 +24,31 @@ import java.util.List;
 
 
 public class Main {
-    private static ProxyRepository proxyRepository = new ProxyRepositoryImpl();
-    private static ActorRef proxyManagerRef;
-    private static final Logger logger = Logger.getLogger(Main.class.getName());
+
+    private static final Logger logger = Logger.getLogger(Main.class);
 
     public static void main(String[] args) throws Exception {
-        initActorSystem();
-        OptionParser parser = initCLIParser();
-        OptionSet optionSet = parser.parse(args);
+        Vertx vertx = Vertx.vertx();
+        vertx.deployVerticle(Server.class.getName());
+        test(vertx);
+    }
 
-        if (optionSet.has("request")) {
-            String url = (String) optionSet.valueOf("request");
-            logger.info("request to " + url);
-            ExecuteRequestEvent executeRequestEvent = new ExecuteRequestEvent(url);
-            proxyManagerRef.tell(executeRequestEvent, ActorRef.noSender());
-        }
-        else if (optionSet.has("check")) {
-            logger.info("checking");
-            proxyManagerRef.tell("startMonitoring",ActorRef.noSender());
-        }
-        else if (optionSet.has("parse")) {
-            String filePath = (String) optionSet.valueOf("parse");
-            logger.info("parsing " + filePath );
-            ProxyParseEvent proxyParseEvent = new ProxyParseEvent(filePath);
-            proxyManagerRef.tell(proxyParseEvent,ActorRef.noSender());
+    private static void test(Vertx vertx) {
+        int nOfRequests = 10;
+        final int[] successCounter = {0};
+        for (int i = 0; i < nOfRequests; i++) {
+            int requestId = i;
+            vertx.createHttpClient().post(8081, "localhost", "/", httpClientResponse -> {
+                httpClientResponse.bodyHandler(buffer -> {
+                    successCounter[0]++;
+                    logger.info("request #"+ requestId + " is done");
+                    if( successCounter[0]==nOfRequests) {
+                        logger.info("ALL ARE DONE");
+                    }
+                });
+            }).end("--request=google.com");
         }
     }
 
-    private static void initActorSystem() {
-        ActorSystem system = ActorSystem.create("system");
 
-        proxyManagerRef = system.actorOf(
-                Props.create(ProxyManager.class,(Creator<ProxyManager>) () ->
-                        new ProxyManager(proxyRepository)));
-    }
-
-    private static OptionParser initCLIParser() {
-        return new OptionParser() {
-                {
-                    accepts("request").withRequiredArg();
-                    accepts("check");
-                    accepts("parse").withRequiredArg();
-                }
-            };
-    }
 }
