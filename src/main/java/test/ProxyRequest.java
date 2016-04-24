@@ -27,8 +27,7 @@ class ProxyRequest extends UntypedActor {
     private final LoggingAdapter logger = Logging.getLogger(getContext().system(),this);
     private int timeOut;
 
-    public ProxyRequest(int timeOut) {
-        this.timeOut = timeOut;
+    public ProxyRequest() {
         httpClient = HttpClients.createDefault();
     }
 
@@ -36,7 +35,7 @@ class ProxyRequest extends UntypedActor {
     public void onReceive(Object o) throws Exception {
         if(o instanceof ProxyRequestEvent) {
             ProxyRequestEvent proxyRequestEvent = (ProxyRequestEvent) o;
-
+            timeOut = proxyRequestEvent.getTimeOut();
             ProxyResponseEvent proxyResponseEvent = executeRequest(proxyRequestEvent.getUrl(),
                     proxyRequestEvent.getProxy());
             getSender().tell(proxyResponseEvent, getSelf());
@@ -60,19 +59,23 @@ class ProxyRequest extends UntypedActor {
 
         logger.debug("Executing request " + request.getRequestLine() + " to " + target + " via " + proxyHost);
 
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        ScheduledFuture<CloseableHttpResponse> result = executor.schedule(() ->
-                httpClient.execute(target, request), 3, TimeUnit.SECONDS);
+        Future<CloseableHttpResponse> result =
+                Executors.newSingleThreadExecutor().submit(() ->
+                    httpClient.execute(target, request));
 
         CloseableHttpResponse response = null;
         try {
-            response = result.get();
-            logger.debug("request executed with code " + response.getStatusLine().getStatusCode() );
-        } catch (InterruptedException | ExecutionException e) {
-            logger.debug("error during request");
+            response = result.get(timeOut,TimeUnit.MILLISECONDS);
+            logger.debug("request via proxy with id "+ proxy.getId() +" executed with code " + response.getStatusLine().getStatusCode() );
+        } catch (InterruptedException  e) {
+            logger.debug("interrupted exception via proxy with id " + proxy.getId());
+        }catch (ExecutionException e) {
+            logger.debug("error during request via proxy with id " + proxy.getId());
+        } catch (TimeoutException e) {
+            logger.debug("timeout exception ("+timeOut+" milliseconds) via proxy with id " + proxy.getId());
         }
 
-        return new ProxyResponseEvent(proxy,response, targetUrl);
+        return new ProxyResponseEvent(proxy,response, targetUrl,timeOut);
     }
 
     private void test() {

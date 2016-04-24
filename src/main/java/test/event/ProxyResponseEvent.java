@@ -11,11 +11,17 @@ public class ProxyResponseEvent {
     private final Proxy proxy;
     private final CloseableHttpResponse response;
     private final String url;
+    private final int timeOut;
 
-    public ProxyResponseEvent(Proxy proxy, CloseableHttpResponse response, String url) {
+    public ProxyResponseEvent(Proxy proxy, CloseableHttpResponse response, String url, int timeOut) {
         this.proxy = proxy;
         this.response = response;
         this.url = url;
+        this.timeOut = timeOut;
+    }
+
+    public int getTimeOut() {
+        return timeOut;
     }
 
     public Proxy getProxy() {

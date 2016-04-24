@@ -30,7 +30,17 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Vertx vertx = Vertx.vertx();
         vertx.deployVerticle(Server.class.getName());
-        test(vertx);
+//        vertx.setTimer(4000, aLong -> {
+//            test(vertx);
+//        });
+    }
+
+    private static void check(Vertx vertx) {
+        vertx.createHttpClient().post(8081, "localhost", "/", httpClientResponse -> {
+            httpClientResponse.bodyHandler(buffer -> {
+
+            });
+        }).end("--check=start");
     }
 
     private static void test(Vertx vertx) {

@@ -32,7 +32,7 @@ class ProxyChecker extends UntypedActor {
     @Override
     public void preStart() throws Exception {
         proxyRequest = getContext().actorOf(Props.create(ProxyRequest.class,
-                (Creator<ProxyRequest>) () -> new ProxyRequest(timeOut)).withRouter(new RoundRobinPool(nOfRequests)));
+                (Creator<ProxyRequest>) ProxyRequest::new).withRouter(new RoundRobinPool(nOfRequests)));
     }
 
     ProxyChecker(int timeOut, ProxyRepository proxyRepository) {
@@ -44,7 +44,7 @@ class ProxyChecker extends UntypedActor {
     public void onReceive(Object o) throws Exception {
         if(o instanceof Proxy) {
             Proxy proxy = (Proxy) o;
-            ProxyRequestEvent proxyRequestEvent = new ProxyRequestEvent(proxy,"www.google.com");
+            ProxyRequestEvent proxyRequestEvent = new ProxyRequestEvent(proxy,"www.google.com",timeOut);
             proxyRequest.tell(proxyRequestEvent,getSelf());
         }
         else if(o instanceof ProxyResponseEvent) {
@@ -56,6 +56,7 @@ class ProxyChecker extends UntypedActor {
             }
         }
         else {
+            logger.info(o.toString());
             unhandled(o);
         }
     }

@@ -8,10 +8,16 @@ import test.entity.Proxy;
 public class ProxyRequestEvent {
     private final Proxy proxy;
     private final String url;
+    private int timeOut;
 
-    public ProxyRequestEvent(Proxy proxy, String url) {
+    public ProxyRequestEvent(Proxy proxy, String url,int timeOut) {
         this.proxy = proxy;
         this.url = url;
+        this.timeOut = timeOut;
+    }
+
+    public int getTimeOut() {
+        return timeOut;
     }
 
     public Proxy getProxy() {

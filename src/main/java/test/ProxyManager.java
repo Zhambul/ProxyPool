@@ -1,6 +1,7 @@
 package test;
 
 import akka.actor.ActorRef;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
@@ -23,39 +24,37 @@ class ProxyManager extends UntypedActor{
     private LoggingAdapter logger = Logging.getLogger(getContext().system(),this);
 
     private static final int nOfRequests = 10;
-    private static final int CHECKING_TIMEOUT = 3 * 1000;
-    private static final int REQUEST_TIMEOUT = 3 * 1000;
 
     private final ProxyRepository proxyRepository;
     private ActorRef proxyChecker;
     private ActorRef proxyRequest;
     private ActorRef proxyParser;
-    private ActorRef outside;
+    private ActorRef server;
 
     ProxyManager(ProxyRepository proxyRepository) {
         this.proxyRepository = proxyRepository;
 
-        proxyChecker = getContext().actorOf(
-                Props.create(ProxyChecker.class,(Creator<ProxyChecker>) () ->
-                        new ProxyChecker(CHECKING_TIMEOUT,proxyRepository)));
-
         proxyRequest = getContext().actorOf(
                 Props.create(ProxyRequest.class, (Creator<ProxyRequest>) ()
-                    -> new ProxyRequest(REQUEST_TIMEOUT)).withRouter(new RoundRobinPool(nOfRequests)));
+                    -> new ProxyRequest()).withRouter(new RoundRobinPool(nOfRequests)));
 
         proxyParser = getContext().actorOf(Props.create(ProxyParser.class));
     }
 
     @Override
     public void onReceive(Object o) throws Exception {
-        if(o instanceof String && o.equals("startMonitoring")) {
-            startMonitoring();
+        if(o instanceof StartCheckEvent) {
+            StartCheckEvent startCheckEvent = (StartCheckEvent) o;
+            startChecking(startCheckEvent);
+        }
+        else if(o.equals("stopChecking")){
+            stopChecking();
         }
         else if(o instanceof ExecuteRequestEvent) {
             ExecuteRequestEvent executeRequestEvent = (ExecuteRequestEvent) o;
-            executeProxyRequest(executeRequestEvent.getUrl());
+            executeProxyRequest(executeRequestEvent);
             if(!executeRequestEvent.isAgain()) {
-                outside = getSender();
+                server = getSender();
             }
         }
         else if(o instanceof ProxyResponseEvent) {
@@ -85,19 +84,18 @@ class ProxyManager extends UntypedActor{
             logger.debug("updating proxy");
             proxyRepository.update(failedProxy);
             logger.debug("updated proxy");
-            ExecuteRequestEvent executeRequestEvent = new ExecuteRequestEvent(proxyResponse.getUrl(),true);
+            ExecuteRequestEvent executeRequestEvent = new ExecuteRequestEvent(proxyResponse.getUrl(),proxyResponse.getTimeOut(),true);
             getSelf().tell(executeRequestEvent, getSelf());
         }
         else {
-//            logger.info(proxyResponse.getResponse().getStatusLine().toString());
-            outside.tell(EntityUtils.toString(proxyResponse.getResponse().getEntity()),getSelf());
+            server.tell(EntityUtils.toString(proxyResponse.getResponse().getEntity()),getSelf());
             proxyResponse.getResponse().close();
         }
     }
 
-    private void executeProxyRequest(String url) {
+    private void executeProxyRequest(ExecuteRequestEvent executeRequestEvent) {
         logger.debug("exec command");
-        String targetUrl = validateUrl(url);
+        String targetUrl = validateUrl(executeRequestEvent.getUrl());
         List<Proxy> proxiesActive = proxyRepository.getActive();
         if(proxiesActive.size() == 0) {
             logger.info("no active proxies ");
@@ -105,15 +103,29 @@ class ProxyManager extends UntypedActor{
         }
         Proxy proxy = proxiesActive.get(new Random().nextInt(proxiesActive.size()));
         logger.info("executing request via proxy with id " + proxy.getId() +" to " + targetUrl);
-        ProxyRequestEvent proxyRequestEvent = new ProxyRequestEvent(proxy, targetUrl);
+        ProxyRequestEvent proxyRequestEvent = new ProxyRequestEvent(proxy, targetUrl,executeRequestEvent.getTimeOut());
         proxyRequest.tell(proxyRequestEvent,getSelf());
     }
 
-    private void startMonitoring() {
-        List<Proxy> proxies = proxyRepository.getAllSorted();
-        for (Proxy proxy : proxies) {
-            proxyChecker.tell(proxy, getSelf());
+    private void startChecking(StartCheckEvent startCheckEvent) {
+        if(proxyChecker == null) {
+            proxyChecker = getContext().actorOf(
+                    Props.create(ProxyChecker.class, (Creator<ProxyChecker>) () ->
+                            new ProxyChecker(startCheckEvent.getTimeOut(), proxyRepository)));
+
+            List<Proxy> proxies = proxyRepository.getAllSorted();
+            for (Proxy proxy : proxies) {
+                proxyChecker.tell(proxy, getSelf());
+            }
         }
+        else {
+            logger.info("already checking");
+        }
+    }
+
+    private void stopChecking() {
+        proxyChecker.tell(PoisonPill.getInstance(),getSelf());
+        proxyChecker = null;
     }
 
     private String validateUrl(String url) {

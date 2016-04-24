@@ -11,14 +11,20 @@ public class ExecuteRequestEvent {
 
     private final String url;
     private final boolean again;
+    private final int timeOut;
 
-    public ExecuteRequestEvent(String url) {
-        this(url,false);
+    public ExecuteRequestEvent(String url, int timeOut) {
+        this(url,timeOut,false);
     }
 
-    public ExecuteRequestEvent(String url, boolean again) {
+    public ExecuteRequestEvent(String url,int timeOut, boolean again) {
         this.url = url;
+        this.timeOut = timeOut;
         this.again = again;
+    }
+
+    public int getTimeOut() {
+        return timeOut;
     }
 
     public boolean isAgain() {
