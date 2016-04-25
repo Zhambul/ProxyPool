@@ -1,9 +1,5 @@
 package test.event;
 
-import jdk.nashorn.internal.codegen.CompilerConstants;
-
-import java.util.function.Function;
-
 /**
  * Created by Жамбыл on 4/23/2016.
  */

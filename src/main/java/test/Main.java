@@ -1,26 +1,7 @@
 package test;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.actor.UntypedActor;
-import akka.japi.Creator;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClientResponse;
-import joptsimple.ArgumentAcceptingOptionSpec;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpecBuilder;
 import org.apache.log4j.Logger;
-import test.database.ProxyRepository;
-import test.database.ProxyRepositoryImpl;
-import test.entity.Proxy;
-import test.event.ExecuteRequestEvent;
-import test.event.ProxyParseEvent;
-
-import java.util.List;
 
 
 public class Main {
@@ -38,9 +19,9 @@ public class Main {
     private static void check(Vertx vertx) {
         vertx.createHttpClient().post(8081, "localhost", "/", httpClientResponse -> {
             httpClientResponse.bodyHandler(buffer -> {
-
+                System.out.println(buffer.toString());
             });
-        }).end("--check=start");
+        }).end("-check start");
     }
 
     private static void test(Vertx vertx) {
@@ -56,7 +37,7 @@ public class Main {
                         logger.info("ALL ARE DONE");
                     }
                 });
-            }).end("-request www.habrahabr.ru -id " + requestId);
+            }).end("-request stackoverflow.com -id " + requestId);
         }
     }
 

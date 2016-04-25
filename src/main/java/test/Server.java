@@ -72,7 +72,14 @@ public class Server extends AbstractVerticle {
                 handleRequest(routingContext, optionSet, timeOut);
             }
             if (optionSet.has("check")) {
-                handleCheck(routingContext, optionSet,timeOut);
+                String url = null;
+                if(optionSet.has("url")) {
+                    url = (String) optionSet.valueOf("url");
+                }
+                else if(optionSet.has("a")) {
+                    url = "www.azenv.com";
+                }
+                handleCheck(routingContext, optionSet,timeOut,url);
             }
             if (optionSet.has("parse")) {
                 handleParse(routingContext, optionSet);
@@ -88,11 +95,11 @@ public class Server extends AbstractVerticle {
         routingContext.response().end();
     }
 
-    private void handleCheck(RoutingContext routingContext, OptionSet optionSet, int timeOut) {
+    private void handleCheck(RoutingContext routingContext, OptionSet optionSet, int timeOut, String url) {
         Object flag = optionSet.valueOf("check");
         if(flag.equals("start")) {
             logger.info("start checking");
-            StartCheckEvent startCheckEvent = new StartCheckEvent(timeOut);
+            StartCheckEvent startCheckEvent = new StartCheckEvent(timeOut,url);
             inbox.send(proxyManager, startCheckEvent);
             routingContext.response().end();
         }
@@ -153,6 +160,8 @@ public class Server extends AbstractVerticle {
             {
                 accepts("request").withRequiredArg();
                 accepts("check").withRequiredArg();
+                accepts("a").availableIf("check");
+                accepts("url").availableIf("check").availableUnless("a").withRequiredArg();
                 accepts("id").requiredIf("request").withRequiredArg().ofType(Integer.class);
                 accepts("timeOut").availableIf("request").availableIf("check").withRequiredArg().ofType(Integer.class);
                 accepts("parse").withRequiredArg();

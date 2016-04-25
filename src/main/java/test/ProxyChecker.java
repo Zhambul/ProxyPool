@@ -9,9 +9,9 @@ import akka.japi.Creator;
 import akka.routing.RoundRobinPool;
 import test.database.ProxyRepository;
 import test.entity.Proxy;
-import test.event.CheckProxiesEvent;
 import test.event.ProxyRequestEvent;
 import test.event.ProxyResponseEvent;
+import test.event.StartCheckEvent;
 import test.validation.*;
 
 import java.io.IOException;
@@ -27,7 +27,6 @@ class ProxyChecker extends UntypedActor {
 
     private LoggingAdapter logger = Logging.getLogger(getContext().system(), this);;
 
-    private int timeOut;
     private ProxyRepository proxyRepository;
     private ActorRef proxyRequest;
     private final static int nOfRequests = 10;
@@ -42,21 +41,21 @@ class ProxyChecker extends UntypedActor {
                 (Creator<ProxyRequest>) ProxyRequest::new).withRouter(new RoundRobinPool(nOfRequests)));
     }
 
-    ProxyChecker(int timeOut, ProxyRepository proxyRepository) {
-        this.timeOut = timeOut;
+    ProxyChecker(ProxyRepository proxyRepository) {
         this.proxyRepository = proxyRepository;
         proxiesToCheck = proxyRepository.getAllSorted();
 
         validators = new ArrayList<>();
-        validators.add(new ValidationNullResponse());
-        validators.add(new Validation200InResponse());
-//        validators.add(new ValidationYandexHeaders());
+        validators.add(new ValidationNullResponse(getContext().system()));
+        validators.add(new Validation200InResponse(getContext().system()));
+        validators.add(new ValidationAnonymityOnAzenvNet(getContext().system()));
+        validators.add(new ValidationYandexHeaders(getContext().system()));
     }
 
     @Override
     public void onReceive(Object o) throws Exception {
-        if(o instanceof CheckProxiesEvent) {
-            onStartCheckingProxies((CheckProxiesEvent) o);
+        if(o instanceof StartCheckEvent) {
+            onStartCheckingProxies((StartCheckEvent) o);
         }
         else if(o instanceof ProxyResponseEvent) {
             onProxyResponse((ProxyResponseEvent) o);
@@ -66,17 +65,26 @@ class ProxyChecker extends UntypedActor {
         }
     }
 
-    private void onStartCheckingProxies(CheckProxiesEvent checkProxiesEvent) {
+    private void onStartCheckingProxies(StartCheckEvent startCheckEvent) {
         proxyManager = getSender();
         proxiesToCheck.forEach(proxy -> {
-            String targetUrl = "www.google.com";
             int dummyRequestId = -1;
+            String targetUrl = getTargetUrl(startCheckEvent,proxy);
+            ProxyRequestEvent proxyRequestEvent = new ProxyRequestEvent(proxy,targetUrl,startCheckEvent.getTimeOut(),dummyRequestId);
+            proxyRequest.tell(proxyRequestEvent,getSelf());
+        });
+    }
+
+    private String getTargetUrl(StartCheckEvent startCheckEvent, Proxy proxy) {
+        if (startCheckEvent.getUrl() == null) {
+            String targetUrl = "www.google.com";
+
             if(proxy.getCountry().equals("China")) {
                 targetUrl = "www.yandex.ru";
             }
-            ProxyRequestEvent proxyRequestEvent = new ProxyRequestEvent(proxy,targetUrl,timeOut,dummyRequestId);
-            proxyRequest.tell(proxyRequestEvent,getSelf());
-        });
+            return targetUrl;
+        }
+        return startCheckEvent.getUrl();
     }
 
     private void onProxyResponse(ProxyResponseEvent proxyResponseEvent) throws IOException {
@@ -117,7 +125,9 @@ class ProxyChecker extends UntypedActor {
     }
 
     private void onProxyFailed(Proxy proxyEntity) {
-        logger.debug("proxy with id " + proxyEntity.getId() + " failed");
+        if(proxyEntity.getCountry().equals("China")){
+            int a =3;
+        }
         proxyEntity.setLastRequestDate(new Date(Calendar.getInstance().getTimeInMillis()));
         proxyEntity.decRating();
         proxyEntity.setActive(false);

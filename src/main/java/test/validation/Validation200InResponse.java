@@ -1,6 +1,8 @@
 package test.validation;
 
-import org.apache.log4j.Logger;
+import akka.actor.ActorSystem;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 import test.event.ProxyResponseEvent;
 
 
@@ -9,8 +11,21 @@ import test.event.ProxyResponseEvent;
  */
 public class Validation200InResponse implements ValidationStrategy {
 
+    private LoggingAdapter logger;
+
+    public Validation200InResponse(ActorSystem system) {
+        logger = Logging.getLogger(system,this);
+    }
+
     @Override
     public boolean validate(ProxyResponseEvent responseEvent) {
-        return responseEvent.getResponse().getStatusLine().getStatusCode() == 200;
+        if(responseEvent.getResponse().getStatusLine().getStatusCode() == 200) {
+            logger.debug("200");
+            return true;
+        }
+        else {
+            logger.debug("not 200");
+            return false;
+        }
     }
 }

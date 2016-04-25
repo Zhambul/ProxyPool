@@ -1,5 +1,8 @@
 package test.validation;
 
+import akka.actor.ActorSystem;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 import test.event.ProxyResponseEvent;
 
 /**
@@ -7,8 +10,22 @@ import test.event.ProxyResponseEvent;
  */
 public class ValidationNullResponse implements ValidationStrategy {
 
+    private LoggingAdapter logger;
+
+    public ValidationNullResponse(ActorSystem system) {
+        logger = Logging.getLogger(system,this);
+    }
+
     @Override
     public boolean validate(ProxyResponseEvent responseEvent) {
-        return responseEvent.getResponse() != null;
+        if (responseEvent.getResponse() != null) {
+            logger.debug("response in not null");
+            return true;
+        }
+        else {
+            logger.debug("response in null");
+            return false;
+        }
+
     }
 }

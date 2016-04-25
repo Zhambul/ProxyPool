@@ -44,8 +44,8 @@ class ProxyManager extends UntypedActor{
 
         proxyParser = getContext().actorOf(Props.create(ProxyParser.class));
         validators = new ArrayList<>();
-        validators.add(new ValidationNullResponse());
-        validators.add(new Validation200InResponse());
+        validators.add(new ValidationNullResponse(getContext().system()));
+        validators.add(new Validation200InResponse(getContext().system()));
     }
 
     @Override
@@ -120,10 +120,9 @@ class ProxyManager extends UntypedActor{
         if(proxyChecker == null) {
             proxyChecker = getContext().actorOf(
                     Props.create(ProxyChecker.class, (Creator<ProxyChecker>) () ->
-                            new ProxyChecker(startCheckEvent.getTimeOut(), proxyRepository)), "checker");
+                            new ProxyChecker(proxyRepository)), "checker");
 
-            CheckProxiesEvent checkProxiesEvent = new CheckProxiesEvent();
-            proxyChecker.tell(checkProxiesEvent,getSelf());
+            proxyChecker.tell(startCheckEvent,getSelf());
         }
         else {
             logger.info("already checking");

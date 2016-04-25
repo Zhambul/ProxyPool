@@ -5,9 +5,15 @@ package test.event;
  */
 public class StartCheckEvent {
     private final int timeOut;
+    private final String url;
 
-    public StartCheckEvent(int timeOut) {
+    public StartCheckEvent(int timeOut, String url) {
         this.timeOut = timeOut;
+        this.url = url;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public int getTimeOut() {
