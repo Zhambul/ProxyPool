@@ -1,26 +1,24 @@
 package test;
 
 import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import akka.routing.RoundRobinPool;
-import org.apache.http.Header;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import test.database.ProxyRepository;
 import test.entity.Proxy;
 import test.event.CheckProxiesEvent;
 import test.event.ProxyRequestEvent;
 import test.event.ProxyResponseEvent;
+import test.validation.*;
 
 import java.io.IOException;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Created by Жамбыл on 4/23/2016.
@@ -36,6 +34,7 @@ class ProxyChecker extends UntypedActor {
     private int currentNumberOfResponses;
     private List<Proxy> proxiesToCheck;
     private ActorRef proxyManager;
+    private List<ValidationStrategy> validators;
 
     @Override
     public void preStart() throws Exception {
@@ -46,12 +45,18 @@ class ProxyChecker extends UntypedActor {
     ProxyChecker(int timeOut, ProxyRepository proxyRepository) {
         this.timeOut = timeOut;
         this.proxyRepository = proxyRepository;
+        proxiesToCheck = proxyRepository.getAllSorted();
+
+        validators = new ArrayList<>();
+        validators.add(new ValidationNullResponse());
+        validators.add(new Validation200InResponse());
+//        validators.add(new ValidationYandexHeaders());
     }
 
     @Override
     public void onReceive(Object o) throws Exception {
         if(o instanceof CheckProxiesEvent) {
-            onCheckProxies((CheckProxiesEvent) o);
+            onStartCheckingProxies((CheckProxiesEvent) o);
         }
         else if(o instanceof ProxyResponseEvent) {
             onProxyResponse((ProxyResponseEvent) o);
@@ -61,14 +66,13 @@ class ProxyChecker extends UntypedActor {
         }
     }
 
-    private void onCheckProxies(CheckProxiesEvent checkProxiesEvent) {
+    private void onStartCheckingProxies(CheckProxiesEvent checkProxiesEvent) {
         proxyManager = getSender();
-        proxiesToCheck = checkProxiesEvent.getProxies();
         proxiesToCheck.forEach(proxy -> {
             String targetUrl = "www.google.com";
             int dummyRequestId = -1;
             if(proxy.getCountry().equals("China")) {
-                targetUrl = "www.renren.com";
+                targetUrl = "www.yandex.ru";
             }
             ProxyRequestEvent proxyRequestEvent = new ProxyRequestEvent(proxy,targetUrl,timeOut,dummyRequestId);
             proxyRequest.tell(proxyRequestEvent,getSelf());
@@ -76,43 +80,36 @@ class ProxyChecker extends UntypedActor {
     }
 
     private void onProxyResponse(ProxyResponseEvent proxyResponseEvent) throws IOException {
+        validateResponse(proxyResponseEvent);
+
+        if(proxyResponseEvent.getResponse() != null) {
+            proxyResponseEvent.getResponse().close();
+        }
+
+        stopCheckingIfNeed();
+    }
+
+    private void stopCheckingIfNeed() {
         currentNumberOfResponses++;
         if(currentNumberOfResponses == proxiesToCheck.size()) {
             logger.info("stopChecking");
             proxyManager.tell("stopChecking",getSelf());
         }
-        validateResponse(proxyResponseEvent.getProxy(), proxyResponseEvent.getResponse());
-
-        if(proxyResponseEvent.getResponse() != null) {
-            proxyResponseEvent.getResponse().close();
-        }
     }
 
-    private void validateResponse(Proxy proxy, CloseableHttpResponse response) {
-        if(validateProxyResponse(response)) {
-            onProxySucceeded(proxy);
+    private void validateResponse(ProxyResponseEvent proxyResponseEvent) {
+        for (ValidationStrategy validator : validators) {
+            if(!validator.validate(proxyResponseEvent)) {
+                onProxyFailed(proxyResponseEvent.getProxy());
+                return;
+            }
         }
-        else {
-            logger.debug(proxy.getIp() + " "+ proxy.getScheme());
-            onProxyFailed(proxy);
-        }
+        onProxySucceeded(proxyResponseEvent.getProxy());
     }
 
-    private boolean validateProxyResponse(CloseableHttpResponse response) {
-        if(response == null) {
-            return false;
-        }
-        Header[] xFrameOptionHeader = response.getHeaders("x-frame-options");
-        if(xFrameOptionHeader == null ||xFrameOptionHeader.length==0)
-        {
-            logger.debug("missing header ");
-            return false;
-        }
-        return response.getStatusLine().getStatusCode() == 200 && xFrameOptionHeader[0].getValue().length() != 0;
-    }
 
     private void onProxySucceeded(Proxy proxy) {
-        logger.info("proxy with id " + proxy.getId() + " is active");
+        logger.info("proxy with id " + proxy.getId() +" from "+ proxy.getCountry() + " is active");
         proxy.setLastRequestDate(new Date(Calendar.getInstance().getTimeInMillis()));
         proxy.incRating();
         proxy.setActive(true);

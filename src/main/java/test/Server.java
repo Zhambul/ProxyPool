@@ -127,6 +127,13 @@ public class Server extends AbstractVerticle {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            finally {
+                try {
+                    proxyResponseEvent.getResponse().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             routingContext.response().putHeader("X-Request-Id", String.valueOf(proxyResponseEvent.getRequestId())).end(body);
             logger.info("success request with id " + proxyResponseEvent.getRequestId());
         });

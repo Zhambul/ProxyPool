@@ -30,9 +30,9 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Vertx vertx = Vertx.vertx();
         vertx.deployVerticle(Server.class.getName());
-//        vertx.setTimer(4000, aLong -> {
-//            test(vertx);
-//        });
+        vertx.setTimer(4000, aLong -> {
+            test(vertx);
+        });
     }
 
     private static void check(Vertx vertx) {
@@ -45,7 +45,7 @@ public class Main {
 
     private static void test(Vertx vertx) {
         logger.info("testing");
-        int nOfRequests = 5;
+        int nOfRequests = 10;
         final int[] successCounter = {0};
         for (int i = 0; i < nOfRequests; i++) {
             int requestId = i;
@@ -56,7 +56,7 @@ public class Main {
                         logger.info("ALL ARE DONE");
                     }
                 });
-            }).end("-request google.com -id " + requestId);
+            }).end("-request www.habrahabr.ru -id " + requestId);
         }
     }
 

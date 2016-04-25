@@ -83,7 +83,6 @@ class ProxyRequest extends UntypedActor {
         } catch (TimeoutException e) {
             logger.debug("timeout exception ("+timeOut+" milliseconds) via proxy with id " + proxy.getId());
         }
-
         return new ProxyResponseEvent(proxy,response, targetUrl,timeOut,requestId);
     }
 

@@ -11,8 +11,12 @@ import akka.routing.RoundRobinPool;
 import test.database.ProxyRepository;
 import test.entity.Proxy;
 import test.event.*;
+import test.validation.Validation200InResponse;
+import test.validation.ValidationNullResponse;
+import test.validation.ValidationStrategy;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -29,6 +33,7 @@ class ProxyManager extends UntypedActor{
     private ActorRef proxyRequest;
     private ActorRef proxyParser;
     private ActorRef server;
+    private List<ValidationStrategy> validators;
 
     ProxyManager(ProxyRepository proxyRepository) {
         this.proxyRepository = proxyRepository;
@@ -38,6 +43,9 @@ class ProxyManager extends UntypedActor{
                         .withRouter(new RoundRobinPool(nOfRequests)));
 
         proxyParser = getContext().actorOf(Props.create(ProxyParser.class));
+        validators = new ArrayList<>();
+        validators.add(new ValidationNullResponse());
+        validators.add(new Validation200InResponse());
     }
 
     @Override
@@ -74,24 +82,7 @@ class ProxyManager extends UntypedActor{
         }
     }
 
-    private void onProxyResponse(ProxyResponseEvent proxyResponse) throws IOException {
-        if(proxyResponse.getResponse() == null || proxyResponse.getResponse().getStatusLine().getStatusCode() != 200) {
-            logger.info("fail using proxy with id " + proxyResponse.getProxy().getId() + ", try next ");
-            Proxy failedProxy = proxyResponse.getProxy();
-            failedProxy.decRating();
-            failedProxy.setActive(false);
-            logger.debug("updating proxy");
-            proxyRepository.update(failedProxy);
-            ExecuteRequestEvent executeRequestEvent = new ExecuteRequestEvent(proxyResponse.getUrl(),proxyResponse.getTimeOut(),proxyResponse.getRequestId());
-            getSelf().tell(executeRequestEvent, getSelf());
-        }
-        else {
-            server.tell(proxyResponse,getSelf());
-        }
-    }
-
     private void executeProxyRequest(ExecuteRequestEvent executeRequestEvent) {
-        logger.debug("exec command");
         String targetUrl = validateUrl(executeRequestEvent.getUrl());
         List<Proxy> proxiesActive = proxyRepository.getActive();
         if(proxiesActive.size() == 0) {
@@ -99,9 +90,30 @@ class ProxyManager extends UntypedActor{
             return;
         }
         Proxy proxy = proxiesActive.get(new Random().nextInt(proxiesActive.size()));
-        logger.info("executing request via proxy with id " + proxy.getId() +" to " + targetUrl);
         ProxyRequestEvent proxyRequestEvent = new ProxyRequestEvent(proxy, targetUrl,executeRequestEvent.getTimeOut(),executeRequestEvent.getRequestId());
         proxyRequest.tell(proxyRequestEvent,getSelf());
+    }
+
+    private void onProxyResponse(ProxyResponseEvent proxyResponse) throws IOException {
+        for (ValidationStrategy validator : validators) {
+            if(!validator.validate(proxyResponse)) {
+                onProxyFailed(proxyResponse);
+                return;
+            }
+        }
+        logger.info(proxyResponse.getProxy().getCountry() + " is done");
+        server.tell(proxyResponse,getSelf());
+    }
+
+    private void onProxyFailed(ProxyResponseEvent proxyResponse) {
+        logger.info("fail using proxy with id " + proxyResponse.getProxy().getId() + " from "
+                                                + proxyResponse.getProxy().getCountry() +", try next ");
+        Proxy failedProxy = proxyResponse.getProxy();
+        failedProxy.decRating();
+        failedProxy.setActive(false);
+        proxyRepository.update(failedProxy);
+        ExecuteRequestEvent executeRequestEvent = new ExecuteRequestEvent(proxyResponse.getUrl(),proxyResponse.getTimeOut(),proxyResponse.getRequestId());
+        getSelf().tell(executeRequestEvent, getSelf());
     }
 
     private void startChecking(StartCheckEvent startCheckEvent) {
@@ -110,8 +122,7 @@ class ProxyManager extends UntypedActor{
                     Props.create(ProxyChecker.class, (Creator<ProxyChecker>) () ->
                             new ProxyChecker(startCheckEvent.getTimeOut(), proxyRepository)), "checker");
 
-            List<Proxy> proxies = proxyRepository.getChinaOnly();
-            CheckProxiesEvent checkProxiesEvent = new CheckProxiesEvent(proxies);
+            CheckProxiesEvent checkProxiesEvent = new CheckProxiesEvent();
             proxyChecker.tell(checkProxiesEvent,getSelf());
         }
         else {
