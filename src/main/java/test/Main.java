@@ -12,7 +12,7 @@ public class Main {
         Vertx vertx = Vertx.vertx();
         vertx.deployVerticle(Server.class.getName());
         vertx.setTimer(4000, aLong -> {
-            test(vertx);
+            check(vertx);
         });
     }
 
@@ -21,7 +21,7 @@ public class Main {
             httpClientResponse.bodyHandler(buffer -> {
                 System.out.println(buffer.toString());
             });
-        }).end("-check start");
+        }).end("-check start -a");
     }
 
     private static void test(Vertx vertx) {

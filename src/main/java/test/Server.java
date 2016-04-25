@@ -77,7 +77,7 @@ public class Server extends AbstractVerticle {
                     url = (String) optionSet.valueOf("url");
                 }
                 else if(optionSet.has("a")) {
-                    url = "www.azenv.com";
+                    url = "www.azenv.net";
                 }
                 handleCheck(routingContext, optionSet,timeOut,url);
             }

@@ -29,19 +29,6 @@ public class ValidationYandexHeaders implements ValidationStrategy {
         CloseableHttpResponse response = responseEvent.getResponse();
         Header[] headerToCheck = response.getHeaders("x-frame-options");
         if(headerToCheck == null || headerToCheck.length == 0) {
-            String body = null;
-            String[] lines = new String[0];
-            try {
-                body = EntityUtils.toString(responseEvent.getResponse().getEntity());
-                lines = body.split("\n");
-            } catch (IOException e) {
-                logger.debug("error");
-                return false;
-//                e.printStackTrace();
-            }
-            Header[] allHeaders = response.getAllHeaders();
-            String[] a  = lines;
-            String body1 = body;
             logger.debug("no header");
             return false;
         }

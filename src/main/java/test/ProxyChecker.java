@@ -50,6 +50,7 @@ class ProxyChecker extends UntypedActor {
         validators.add(new Validation200InResponse(getContext().system()));
         validators.add(new ValidationAnonymityOnAzenvNet(getContext().system()));
         validators.add(new ValidationYandexHeaders(getContext().system()));
+        validators.add(new ValidationGoogleHeaders(getContext().system()));
     }
 
     @Override

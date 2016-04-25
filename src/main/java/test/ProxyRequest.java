@@ -66,8 +66,8 @@ class ProxyRequest extends UntypedActor {
 
         logger.debug("Executing request " + request.getRequestLine() + " to " + target + " via " + proxyHost);
 
-        Future<CloseableHttpResponse> result =
-                Executors.newSingleThreadExecutor().submit(() ->
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future<CloseableHttpResponse> result = executorService.submit(() ->
                     httpClient.execute(target, request));
 
         CloseableHttpResponse response = null;
@@ -80,6 +80,9 @@ class ProxyRequest extends UntypedActor {
             logger.debug("error during request via proxy with id " + proxy.getId());
         } catch (TimeoutException e) {
             logger.debug("timeout exception ("+timeOut+" milliseconds) via proxy with id " + proxy.getId());
+        }
+        finally {
+            executorService.shutdown();
         }
         return new ProxyResponseEvent(proxy,response, targetUrl,timeOut,requestId);
     }

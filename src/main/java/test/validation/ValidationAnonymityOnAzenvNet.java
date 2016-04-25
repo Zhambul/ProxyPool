@@ -28,7 +28,6 @@ public class ValidationAnonymityOnAzenvNet implements ValidationStrategy {
 
     public ValidationAnonymityOnAzenvNet(ActorSystem actorSystem) {
         logger = Logging.getLogger(actorSystem, this);
-        myIp = getMyIp();
     }
 
     @Override
@@ -36,6 +35,11 @@ public class ValidationAnonymityOnAzenvNet implements ValidationStrategy {
         if(!responseEvent.getUrl().contains("azenv.net")) {
             return true;
         }
+
+        if(myIp == null) {
+            myIp = getMyIp();
+        }
+
         String ip = null;
         try {
             String body = EntityUtils.toString(responseEvent.getResponse().getEntity());
@@ -47,22 +51,24 @@ public class ValidationAnonymityOnAzenvNet implements ValidationStrategy {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
+
         if(ip == null) {
             logger.debug("no value in body");
             return true;
         }
         if(myIp.equals(ip)){
-            logger.info("false!!!");
+            logger.info("ip is matching");
             return false;
         }
+
         return true;
     }
 
     private String getMyIp() {
         logger.debug("getting my ip");
-        URI uri = null;
+        URI uri;
         try {
             uri = new URIBuilder()
                     .setScheme("http")
@@ -70,17 +76,17 @@ public class ValidationAnonymityOnAzenvNet implements ValidationStrategy {
                     .setParameter("format", "json")
                     .build();
         } catch (URISyntaxException e) {
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
 
         HttpClient httpClient = HttpClients.createDefault();
         HttpGet request = new HttpGet(uri);
-        InputStream content = null;
+        InputStream content;
         try {
             HttpResponse response = httpClient.execute(request);
             content = response.getEntity().getContent();
         } catch (IOException e) {
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
 
         Ip ip = null;
