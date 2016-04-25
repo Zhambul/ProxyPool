@@ -10,26 +10,30 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import scala.concurrent.duration.Duration;
 import test.database.ProxyRepository;
 import test.database.ProxyRepositoryImpl;
 import test.event.ExecuteRequestEvent;
 import test.event.ProxyParseEvent;
+import test.event.ProxyResponseEvent;
 import test.event.StartCheckEvent;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
  * Created by user on 22.04.2016.
  */
-class Server extends AbstractVerticle {
+public class Server extends AbstractVerticle {
+    private static final int MIN_TIMEOUT = 1000;
+    private final int DEFAULT_TIMEOUT = 3000;
     private ProxyRepository proxyRepository = new ProxyRepositoryImpl();
-    private ActorRef proxyManagerRef;
+    private ActorRef proxyManager;
     private final Logger logger = Logger.getLogger(Main.class.getName());
     private Inbox inbox;
-    private final int DEFAULT_TIME_OUT = 3000;
 
     @Override
     public void start() throws Exception {
@@ -55,9 +59,9 @@ class Server extends AbstractVerticle {
                 return;
             }
 
-            int timeOut = DEFAULT_TIME_OUT;
+            int timeOut = DEFAULT_TIMEOUT;
             if (optionSet.has("timeOut")) {
-                if((int) optionSet.valueOf("timeOut") < 1000) {
+                if((int) optionSet.valueOf("timeOut") < MIN_TIMEOUT) {
                     routingContext.response().end("too small timeOut");
                     return;
                 }
@@ -80,7 +84,7 @@ class Server extends AbstractVerticle {
         String filePath = (String) optionSet.valueOf("parse");
         logger.info("parsing " + filePath );
         ProxyParseEvent proxyParseEvent = new ProxyParseEvent(filePath);
-        inbox.send(proxyManagerRef,proxyParseEvent);
+        inbox.send(proxyManager,proxyParseEvent);
         routingContext.response().end();
     }
 
@@ -89,12 +93,12 @@ class Server extends AbstractVerticle {
         if(flag.equals("start")) {
             logger.info("start checking");
             StartCheckEvent startCheckEvent = new StartCheckEvent(timeOut);
-            inbox.send(proxyManagerRef, startCheckEvent);
+            inbox.send(proxyManager, startCheckEvent);
             routingContext.response().end();
         }
         else if(flag.equals("stop")){
             logger.info("stop checking");
-            inbox.send(proxyManagerRef, "stopChecking");
+            inbox.send(proxyManager, "stopChecking");
             routingContext.response().end();
         }
         else {
@@ -104,20 +108,27 @@ class Server extends AbstractVerticle {
 
     private void handleRequest(RoutingContext routingContext, OptionSet optionSet, int timeOut) {
         String url = (String) optionSet.valueOf("request");
+        int requestId = (int) optionSet.valueOf("id");
+
         logger.info("request to " + url);
-        ExecuteRequestEvent executeRequestEvent = new ExecuteRequestEvent(url,timeOut);
-        inbox.send(proxyManagerRef,executeRequestEvent);
+        ExecuteRequestEvent executeRequestEvent = new ExecuteRequestEvent(url,timeOut,requestId);
+        inbox.send(proxyManager,executeRequestEvent);
         vertx.executeBlocking(objectFuture -> {
             try {
-                Object receive = inbox.receive(Duration.apply(200, TimeUnit.SECONDS));
-                objectFuture.complete(receive);
+                objectFuture.complete(inbox.receive(Duration.apply(200, TimeUnit.SECONDS)));
             } catch (TimeoutException e) {
                 e.printStackTrace();
             }
         }, objectAsyncResult -> {
-            Object result = objectAsyncResult.result();
-            routingContext.response().end(result.toString());
-            logger.info("success");
+            ProxyResponseEvent proxyResponseEvent = (ProxyResponseEvent) objectAsyncResult.result();
+            String body=null;
+            try {
+                body = EntityUtils.toString(proxyResponseEvent.getResponse().getEntity());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            routingContext.response().putHeader("X-Request-Id", String.valueOf(proxyResponseEvent.getRequestId())).end(body);
+            logger.info("success request with id " + proxyResponseEvent.getRequestId());
         });
     }
 
@@ -125,9 +136,9 @@ class Server extends AbstractVerticle {
         ActorSystem system = ActorSystem.create("system");
         inbox = Inbox.create(system);
 
-        proxyManagerRef = system.actorOf(
+        proxyManager = system.actorOf(
                 Props.create(ProxyManager.class, (Creator<ProxyManager>) () ->
-                        new ProxyManager(proxyRepository)));
+                        new ProxyManager(proxyRepository)),"proxyManager");
     }
 
     private OptionParser initCLIParser() {
@@ -135,8 +146,8 @@ class Server extends AbstractVerticle {
             {
                 accepts("request").withRequiredArg();
                 accepts("check").withRequiredArg();
-                accepts("timeOut").availableIf("request").availableIf("check").withRequiredArg()
-                        .ofType(Integer.class);
+                accepts("id").requiredIf("request").withRequiredArg().ofType(Integer.class);
+                accepts("timeOut").availableIf("request").availableIf("check").withRequiredArg().ofType(Integer.class);
                 accepts("parse").withRequiredArg();
             }
         };

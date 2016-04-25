@@ -44,19 +44,19 @@ public class Main {
     }
 
     private static void test(Vertx vertx) {
-        int nOfRequests = 10;
+        logger.info("testing");
+        int nOfRequests = 5;
         final int[] successCounter = {0};
         for (int i = 0; i < nOfRequests; i++) {
             int requestId = i;
             vertx.createHttpClient().post(8081, "localhost", "/", httpClientResponse -> {
                 httpClientResponse.bodyHandler(buffer -> {
                     successCounter[0]++;
-                    logger.info("request #"+ requestId + " is done");
                     if( successCounter[0]==nOfRequests) {
                         logger.info("ALL ARE DONE");
                     }
                 });
-            }).end("--request=google.com");
+            }).end("-request google.com -id " + requestId);
         }
     }
 

@@ -69,4 +69,22 @@ public class ProxyRepositoryImpl implements ProxyRepository{
         sqlQuery.addEntity(Proxy.class);
         return sqlQuery.list();
     }
+
+    @Override
+    public List<Proxy> getHTTPSOnly() {
+        Session session = HibernateSessionFactory.getSessionFactory().openSession();
+        SQLQuery sqlQuery = session.createSQLQuery("SELECT * FROM proxy_table" +
+                                                   " WHERE scheme = 'HTTPS' ");
+        sqlQuery.addEntity(Proxy.class);
+        return sqlQuery.list();
+    }
+
+    @Override
+    public List<Proxy> getChinaOnly() {
+        Session session = HibernateSessionFactory.getSessionFactory().openSession();
+        SQLQuery sqlQuery = session.createSQLQuery("SELECT * FROM proxy_table" +
+                                                   " WHERE country = 'China' ");
+        sqlQuery.addEntity(Proxy.class);
+        return sqlQuery.list();
+    }
 }

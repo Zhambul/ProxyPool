@@ -3,6 +3,7 @@ package test;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import org.apache.http.HeaderIterator;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -25,7 +26,6 @@ class ProxyRequest extends UntypedActor {
     private CloseableHttpClient httpClient;
 
     private final LoggingAdapter logger = Logging.getLogger(getContext().system(),this);
-    private int timeOut;
 
     public ProxyRequest() {
         httpClient = HttpClients.createDefault();
@@ -35,20 +35,29 @@ class ProxyRequest extends UntypedActor {
     public void onReceive(Object o) throws Exception {
         if(o instanceof ProxyRequestEvent) {
             ProxyRequestEvent proxyRequestEvent = (ProxyRequestEvent) o;
-            timeOut = proxyRequestEvent.getTimeOut();
-            ProxyResponseEvent proxyResponseEvent = executeRequest(proxyRequestEvent.getUrl(),
-                    proxyRequestEvent.getProxy());
+            Proxy proxy = proxyRequestEvent.getProxy();
+            String targetUrl = proxyRequestEvent.getUrl();
+            int timeOut = proxyRequestEvent.getTimeOut();
+            int requestId = proxyRequestEvent.getRequestId();
+
+            ProxyResponseEvent proxyResponseEvent = executeRequest(proxy,targetUrl,timeOut,requestId);
             getSender().tell(proxyResponseEvent, getSelf());
         }else {
             unhandled(o);
         }
     }
 
-    private ProxyResponseEvent executeRequest(String targetUrl, Proxy proxy) throws IOException {
+    private ProxyResponseEvent executeRequest(Proxy proxy, String targetUrl, int timeOut, int requestId) throws IOException {
+
         HttpHost proxyHost = new HttpHost(proxy.getIp(), proxy.getPort(), proxy.getScheme());
 
-        int targetPort = proxy.getScheme().toLowerCase().equals("https") ? 443 : 80;
-        HttpHost target = new HttpHost(targetUrl,targetPort,proxy.getScheme());
+        HttpHost target;
+        if(proxy.getScheme().toLowerCase().equals("https")) {
+            target = new HttpHost(targetUrl);
+        }
+        else {
+            target = new HttpHost(targetUrl,80,proxy.getScheme());
+        }
 
         RequestConfig config = RequestConfig.custom()
                 .setProxy(proxyHost)
@@ -75,7 +84,7 @@ class ProxyRequest extends UntypedActor {
             logger.debug("timeout exception ("+timeOut+" milliseconds) via proxy with id " + proxy.getId());
         }
 
-        return new ProxyResponseEvent(proxy,response, targetUrl,timeOut);
+        return new ProxyResponseEvent(proxy,response, targetUrl,timeOut,requestId);
     }
 
     private void test() {

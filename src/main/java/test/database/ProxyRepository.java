@@ -22,4 +22,8 @@ public interface ProxyRepository {
     List<Proxy> getAll();
 
     List<Proxy> getActive();
+
+    List<Proxy> getHTTPSOnly();
+
+    List<Proxy> getChinaOnly();
 }

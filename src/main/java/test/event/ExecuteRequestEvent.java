@@ -10,25 +10,21 @@ import java.util.function.Function;
 public class ExecuteRequestEvent {
 
     private final String url;
-    private final boolean again;
     private final int timeOut;
+    private final int requestId;
 
-    public ExecuteRequestEvent(String url, int timeOut) {
-        this(url,timeOut,false);
-    }
-
-    public ExecuteRequestEvent(String url,int timeOut, boolean again) {
+    public ExecuteRequestEvent(String url, int timeOut,int requestId) {
         this.url = url;
         this.timeOut = timeOut;
-        this.again = again;
+        this.requestId = requestId;
+    }
+
+    public int getRequestId() {
+        return requestId;
     }
 
     public int getTimeOut() {
         return timeOut;
-    }
-
-    public boolean isAgain() {
-        return again;
     }
 
     public String getUrl() {
